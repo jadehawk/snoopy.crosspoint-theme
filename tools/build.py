@@ -1,6 +1,7 @@
 from __future__ import annotations
 from PIL import Image, ImageDraw, ImageFont, ImageOps, ImageFilter
 from pathlib import Path
+from prepare_usb_grayscale import create as prepare_usb_grayscale
 import json, os, struct, zlib, zipfile, shutil, textwrap
 
 OUT=Path(__file__).resolve().parent.parent
@@ -216,37 +217,17 @@ files={
   'screen-decoration-touch.cpb':touch_screen,
   'boot-art.cpb':boot,
   'boot-art-touch.cpb':touch_boot,
-  'sleep-night.cpb':sleep_mono,
-  'sleep-night-touch.cpb':touch_sleep,
-  'usb-connected.cpb':Image.open(SOURCE/'usb-connected.png').convert('1'),
-  'usb-connected-touch.cpb':ImageOps.pad(Image.open(SOURCE/'usb-connected.png').convert('RGB'),(480,800),color='white',method=Image.Resampling.LANCZOS).convert('1'),
+  'usb-connected.cpb':ImageOps.pad(Image.open(SOURCE/'usb-connected-grayscale.png').convert('RGB'),(528,792),color='white',method=Image.Resampling.LANCZOS).convert('1'),
+  'usb-connected-touch.cpb':ImageOps.pad(Image.open(SOURCE/'usb-connected-grayscale.png').convert('RGB'),(480,800),color='white',method=Image.Resampling.LANCZOS).convert('1'),
 }
-# Maximum 22-scene paired gallery, in addition to the original sleep artwork.
-# Place the companion ZIP in source-art before rebuilding the test theme.
+# Source sleep illustrations are packaged separately as four-tone BMPs.
 T='themes/snoopy/assets/'
-GALLERY_ZIP = SOURCE/'Snoopy_Woodstock_22_Sleep_Scenes_X3_X4Pro.zip'
-sleep_base_paths = [T+'sleep-night.cpb']
-sleep_touch_paths = [T+'sleep-night-touch.cpb']
-if GALLERY_ZIP.is_file():
-    with zipfile.ZipFile(GALLERY_ZIP) as gallery:
-        for n in range(1, 23):
-            for suffix, collection, dimensions in (('', sleep_base_paths, (528,792)),
-                                                   ('-touch', sleep_touch_paths, (480,800))):
-                name=f'sleep-scene-{n:02d}{suffix}.cpb'
-                payload=gallery.read('assets/'+name)
-                magic,version,flags,w,h,stride,nbytes,crc=struct.unpack('<4sBBHHHII',payload[:20])
-                assert (magic,version,flags,w,h,stride,nbytes)==(b'CPTB',1,1,*dimensions,(w+7)//8,stride*h)
-                assert len(payload)==20+nbytes and zlib.crc32(payload[20:]) & 0xffffffff == crc
-                (ASSETS/name).write_bytes(payload)
-                collection.append(T+name)
-else:
-    print('NOTE: Snoopy 22-scene companion archive not imported; preserving single sleep art')
+for old in ASSETS.glob('sleep-*.cpb'):
+    old.unlink()
 
 for name, img in files.items():
-    if name == 'sleep-night.cpb' and (ASSETS / name).is_file():
-        print('PRESERVED sleep-night.cpb (hardware-approved artwork)')
-        continue
     print('CPB', name, img.size, write_cpb(img, ASSETS / name))
+usb_gray_paths = prepare_usb_grayscale(OUT)
 
 T='themes/snoopy/assets/'
 # The renderer owns navigation, actual book card, covers, lists, button input, and status.
@@ -281,8 +262,8 @@ scene={
      
     'boot_art':T+'boot-art.cpb','boot_art_touch':T+'boot-art-touch.cpb',
     'usb_art':T+'usb-connected.cpb','usb_art_touch':T+'usb-connected-touch.cpb',
-    'usb_art':T+'usb-connected.cpb','usb_art_touch':T+'usb-connected-touch.cpb',
-    'sleep_art':sleep_base_paths,'sleep_art_touch':sleep_touch_paths
+    'usb_gray_art':usb_gray_paths['x3'],
+    'sleep_art':'themes/snoopy/sleep'
   },
  'regions':{
    'header':[
@@ -326,9 +307,9 @@ scene["fonts"] = {"ui": {
 (PKG/'themes/snoopy/theme.json').write_text(json.dumps(scene,indent=2)+'\n')
 readme='''Snoopy - cozy reading theme (X3-first preview)
 
-A monochrome Peanuts-inspired theme for theme-capable CrossPoint firmware.
+A Snoopy-inspired reading theme for compatible CrossPoint firmware.
 Each installable ZIP contains only the native-resolution artwork for its target display,
-small decorative drawings, and a moonlit sleep screen.
+monochrome UI decorations, grayscale USB art, and ten rotating grayscale sleep screens.
 
 Use Settings > Display > UI Theme to select Snoopy.
 Requires the SD theme, metrics, images, composition, and settings-navigation
@@ -341,16 +322,16 @@ DynaPuff typeface is by The DynaPuff Project Authors and distributed under
 SIL Open Font License 1.1; see DETAILS.md for the complete OFL text.
 '''
 (PKG/'README.md').write_text(readme)
-(PKG/'DETAILS.md').write_text('''# Snoopy - Cozy Reading (v0.1.15)
+(PKG/'DETAILS.md').write_text('''# Snoopy - Cozy Reading (v0.1.16)
 
 Unofficial concept based on the user-provided Snoopy e-reader mockup.
 
-- X3 reference panel: **528 x 792**. Monochrome, 1-bit images.
+- X3 reference panel: **528 x 792**. UI assets use one-bit CPBs; USB and sleep art use native four-tone grayscale BMPs.
 - Home shows a native dynamic cover, title/author, optional EPUB series and index beneath the author, dark-only-when-focused hero card, and inline saved progress; the top Snoopy hero illustration stays at the same height.
 - Home menu uses outlined cut-corner frames and the Woodstock footer from the supplied art. Settings retains navigable rows, DynaPuff and the original-scale Snoopy head with one tiny heart.
 - Snoopy uses only bounded footer artwork, not a full-screen background. X3 retains both original footer images byte-for-byte; touch panels display taller compositions using the SAME Woodstock/slogan/cloud and Snoopy doghouse/grass-line artwork. Other themes can still use the firmware background capability.
-- Sleep artwork comes from the theme (Dark/Light), not a Custom wallpaper pack. The source-art gallery ZIP adds twenty-two Snoopy & Woodstock scenes plus the approved original to **each** device's dedicated gallery, with random selection and no immediate repeats on matching firmware. The original sleep image remains in the gallery.
-- The source defines six device-sized artwork pairs for header emblem, Home hero, Home footer, list footer, boot and sleep. Each installable ZIP contains **only** the matching display's artwork; the X3 CPBs remain byte-identical to the original approved assets. The same installed theme ID is retained for both resolutions. Snoopy requests the firmware-owned Back arrow plus the header emblem on touch push screens (`theme.header-back.v1`); root Home still has no Back arrow. Native Back routing is unchanged. X4 Pro hardware validation is pending.
+- Sleep artwork comes from the theme (Dark/Light), not a Custom wallpaper pack. This release replaces the old twenty-three monochrome scenes with ten bright four-tone grayscale illustrations, scaled separately for X3 and X4+. Scenes rotate randomly without immediate repeats on compatible firmware.
+- The source defines paired monochrome UI artwork plus a new grayscale Snoopy USB-C cable illustration and device-sized sleep gallery. Each installable ZIP contains **only** the matching display's artwork; the X3 CPBs remain byte-identical to the original approved assets. The same installed theme ID is retained for both resolutions. Snoopy requests the firmware-owned Back arrow plus the header emblem on touch push screens (`theme.header-back.v1`); root Home still has no Back arrow. Native Back routing is unchanged. X4 Pro hardware validation is pending.
 - The home mockup's multi-book gallery, custom apps, red doghouse and yellow character are **not** theme-contract features; they are not promised by this package.
 
 Unofficial, non-commercial fan-made theme using AI-generated illustrations. Snoopy, Woodstock and Peanuts remain trademarks and copyrighted characters of their respective owners. This is not an official or endorsed Peanuts product.
@@ -363,13 +344,13 @@ details_path.write_text(details_path.read_text(encoding='utf-8') +
     (OUT/'source-fonts/OFL.txt').read_text(encoding='utf-8'), encoding='utf-8')
 
 manifest={
- 'kind':'theme-pack','name':'snoopy','title':'Snoopy','description':'Cozy monochrome Snoopy-inspired reading theme for device-sized e-ink screens.',
- 'author':'Jadehawk (concept adaptation)','version':'0.1.15',
+ 'kind':'theme-pack','name':'snoopy','title':'Snoopy','description':'Cozy Snoopy theme with grayscale USB and sleep illustrations for e-ink screens.',
+ 'author':'Jadehawk (concept adaptation)','version':'0.1.16',
  'license':'Unofficial non-commercial fan theme; Peanuts character rights belong to their respective owners.',
  'themes':[{'id':'snoopy','title':'Snoopy','path':'themes/snoopy/theme.json',
-            'requires':['theme.sd.v1','theme.metrics.v1','theme.images.v1','theme.composition.v1','theme.settings-navigation.v1','theme.book-cover.v1','theme.menu-decoration.v1','theme.screen-decoration.v1','theme.header-back.v1','theme.fonts.v1','theme.font-family.v1','theme.sleep-gallery.v1','theme.usb-scene.v1']}],
+            'requires':['theme.sd.v1','theme.metrics.v1','theme.images.v1','theme.composition.v1','theme.settings-navigation.v1','theme.book-cover.v1','theme.menu-decoration.v1','theme.screen-decoration.v1','theme.header-back.v1','theme.fonts.v1','theme.font-family.v1','theme.sleep-gallery.v1','theme.sleep-grayscale.v1','theme.usb-scene.v1','theme.usb-grayscale.v1']}],
  'files':['manifest.json','README.md','DETAILS.md','themes/snoopy/theme.json']+
-         [T+x for x in files] + sleep_base_paths[1:] + sleep_touch_paths[1:] + ['themes/snoopy/fonts/'+role+'.cpfont' for role in ('ui-small','ui-regular','ui-large','display')]
+         [T+x for x in files] + list(usb_gray_paths.values()) + ['themes/snoopy/fonts/'+role+'.cpfont' for role in ('ui-small','ui-regular','ui-large','display')]
 }
 (PKG/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
 (OUT/'README.md').write_text('''# Snoopy CrossPoint Theme (X3-first prototype)
@@ -378,7 +359,7 @@ An **unofficial, non-commercial fan-made theme** with AI-generated Snoopy and Wo
 
 ## Install
 
-Download the device-matched `snoopy-x3-0.1.15.crosspoint-theme.zip` or `snoopy-x4plus-0.1.15.crosspoint-theme.zip` via The Cantina Store, or extract either ZIP to SD path:
+Download the device-matched `snoopy-x3-0.1.16.crosspoint-theme.zip` or `snoopy-x4plus-0.1.16.crosspoint-theme.zip` via The Cantina Store, or extract either ZIP to SD path:
 
 ```
 /.crosspoint/themes/snoopy.crosspoint-theme/
@@ -392,8 +373,8 @@ Select a firmware Dark/Light sleep screen to test the theme's sleep image; Custo
 1. The X3 is 528 x 792 and has no touch interface. This version uses one native Continue Reading card and a navigable list, not the concept's four-cover touchscreen grid.
 2. A 76px Home/Settings header leaves space for firmware-owned battery, title and Back actions; the Snoopy heart is now inset fully within the emblem.
 3. The Home tile expands into previously unused X3 space to restore a real cached cover, book title, author, and actual progress bar when available; firmware keeps book selection and menu behavior.
-4. All graphics are CPB v1, 1-bit black/white. Colors in the source artwork become e-ink grayscale/dithered monochrome.
-5. Sleep art is a fixed X3-sized 528 x 792 background. Preview it on-device before adopting for other displays.
+4. UI decorations remain CPB v1 monochrome; USB and ten sleep illustrations use native four-tone grayscale BMPs.
+5. Sleep and USB artwork are exported independently at 528 x 792 (X3) and 480 x 800 (X4+).
 6. DynaPuff is bundled as four size-specific one-bit v4 CPFONT files. Stock fonts remain the firmware fallback.
 
 ## Limitations
@@ -401,7 +382,7 @@ Select a firmware Dark/Light sleep screen to test the theme's sleep image; Custo
 - Theme schemas cannot replace the firmware's core Home layout, add new menu actions, draw live book grids, or add touch control on X3.
 - Full-screen theme sleep galleries are used for Dark/Light regular sleep entries, not the independent timed sleep refresh pool.
 - This unofficial, non-commercial theme uses Snoopy and Woodstock characters; all Peanuts character trademarks and copyrights remain with their respective rights holders. It is not endorsed by them.
-- Version 0.1.15 ships independent X3 and X4+ archives under one Snoopy theme identity, each with 23 randomly rotated sleep scenes. X3 artwork is unchanged; hardware testing is ongoing.
+- Version 0.1.16 ships independent X3 and X4+ archives under one Snoopy theme identity, each with 10 randomly rotated grayscale sleep scenes and a native grayscale USB screen. Hardware testing is ongoing.
 
 ## Files
 
@@ -410,7 +391,7 @@ Select a firmware Dark/Light sleep screen to test the theme's sleep image; Custo
 - `source-fonts/` contains the upstream DynaPuff TTF and SIL OFL license. Run `python tools/build_fonts.py` before `python tools/build.py` when updating font assets.
 - `previews/` has illustrative X3-size previews, not exact firmware screenshots.
 
-Compatibility is capability-based. Snoopy v0.1.15 additionally requires `theme.book-cover.v1`, `theme.screen-decoration.v1`, `theme.fonts.v1`, and `theme.font-family.v1`; older firmware must reject this feature rather than degrade to a fake book cover. No branded firmware name is a requirement.
+Compatibility is capability-based. Snoopy v0.1.16 requires `theme.sleep-grayscale.v1` and `theme.usb-grayscale.v1` as well as the declared standard theme capabilities; only firmware exposing all required capabilities should install the theme. No branded firmware name is a requirement.
 ''')
 # Approximate X3 previews only. Keep firmware-owned book/menu labels, touch
 # targets, real battery, and row selection distinct from static theme artwork.
@@ -475,7 +456,7 @@ assert sum((PKG/f).stat().st_size for f in manifest['files'])<4*1024*1024
 assert (PKG/'README.md').stat().st_size<2048
 assert all((PKG/f).is_file() for f in manifest['files'])
 for generated in (PKG/'README.md', PKG/'DETAILS.md', OUT/'README.md'):
-    generated.write_text(generated.read_text(encoding='utf-8').replace('0.1.11','0.1.15'),encoding='utf-8')
+    generated.write_text(generated.read_text(encoding='utf-8').replace('0.1.11','0.1.16'),encoding='utf-8')
 # Source payload stays combined for authoring and regression tests; the
 # installable packages each contain only one resolution's CPBs.
 from pack_theme_variants import build as pack_resolution_variants

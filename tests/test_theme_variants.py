@@ -4,6 +4,8 @@ import struct
 import tempfile
 import unittest
 import zipfile
+import io
+from PIL import Image
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -15,7 +17,7 @@ class VariantPackageTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.temp=tempfile.TemporaryDirectory()
-        cls.zips=MODULE.build(ROOT,Path(cls.temp.name),"0.1.15")
+        cls.zips=MODULE.build(ROOT,Path(cls.temp.name),"0.1.16")
 
     @classmethod
     def tearDownClass(cls):
@@ -34,8 +36,8 @@ class VariantPackageTests(unittest.TestCase):
                                  {n for n in names if "/sleep/" in n})
                 self.assertLessEqual(len(names),64)
                 self.assertEqual(scene["assets"]["sleep_art"],"themes/snoopy/sleep")
-                self.assertEqual(len([p for p in names if "/sleep/" in p]),23)
-                for role in ("header_emblem","home_hero","home_footer","screen_art","boot_art","sleep_art","usb_art"):
+                self.assertEqual(len([p for p in names if "/sleep/" in p]),10)
+                for role in ("header_emblem","home_hero","home_footer","screen_art","boot_art","sleep_art","usb_art","usb_gray_art"):
                     self.assertIn(role,scene["assets"])
                 bitmap_paths=[n for n in manifest["files"] if n.endswith(".cpb")]
                 self.assertEqual(len(bitmap_paths),6)
@@ -44,8 +46,16 @@ class VariantPackageTests(unittest.TestCase):
                     self.assertEqual(header[:4],b"CPTB")
                     # Source gallery should never include the other resolution.
                     self.assertEqual(path.endswith("-touch.cpb"),variant=="x4plus")
-                sleep=z.read(prefix+"themes/snoopy/sleep/sleep-night.cpb")
-                self.assertEqual(struct.unpack_from("<HH",sleep,6),size)
+                sleep=z.read(prefix+"themes/snoopy/sleep/sleep-scene-01.bmp")
+                self.assertEqual(sleep[:2], b'BM')
+                self.assertIn('theme.usb-grayscale.v1', manifest['themes'][0]['requires'])
+                self.assertIn('theme.sleep-grayscale.v1', manifest['themes'][0]['requires'])
+                gray_path=scene['assets']['usb_gray_art']
+                self.assertIn(gray_path, manifest['files'])
+                self.assertEqual(gray_path.endswith('-touch.bmp'), variant=='x4plus')
+                with Image.open(io.BytesIO(z.read(prefix+gray_path))) as bmp:
+                    self.assertEqual(bmp.size, size)
+                    self.assertGreaterEqual(len(set(bmp.convert('L').get_flattened_data())), 3)
 
     def test_no_duplicate_artwork(self):
         sources=[]
@@ -53,11 +63,10 @@ class VariantPackageTests(unittest.TestCase):
             with zipfile.ZipFile(path) as archive:
                 names=[p for p in archive.namelist() if p.endswith(".cpb")]
                 sources.append(set(names))
-        # Variant ZIPs intentionally share stable theme-local sleep filenames;
-        # their CPB pixel payloads differ by display geometry.
+        # Core CPBs differ per display; sleep BMPs share filenames but not pixels.
         self.assertEqual(sources[0] & sources[1],
                          {p for p in sources[0] if '/sleep/' in p})
-        self.assertEqual(len(sources[0] & sources[1]), 23)
+        self.assertEqual(len(sources[0] & sources[1]), 0)
 
 if __name__=="__main__":
     unittest.main()

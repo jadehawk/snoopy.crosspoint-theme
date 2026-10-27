@@ -1,8 +1,8 @@
 Snoopy - cozy reading theme (X3-first preview)
 
-A monochrome Peanuts-inspired theme for theme-capable CrossPoint firmware.
+A Snoopy-inspired reading theme for compatible CrossPoint firmware.
 Each installable ZIP contains only the native-resolution artwork for its target display,
-small decorative drawings, and a moonlit sleep screen.
+monochrome UI decorations, grayscale USB art, and ten rotating grayscale sleep screens.
 
 Use Settings > Display > UI Theme to select Snoopy.
 Requires the SD theme, metrics, images, composition, and settings-navigation

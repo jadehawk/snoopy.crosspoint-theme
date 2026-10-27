@@ -1,13 +1,13 @@
-# Snoopy - Cozy Reading (v0.1.15)
+# Snoopy - Cozy Reading (v0.1.16)
 
 Unofficial concept based on the user-provided Snoopy e-reader mockup.
 
-- X3 reference panel: **528 x 792**. Monochrome, 1-bit images.
+- X3 reference panel: **528 x 792**. UI assets use one-bit CPBs; USB and sleep art use native four-tone grayscale BMPs.
 - Home shows a native dynamic cover, title/author, optional EPUB series and index beneath the author, dark-only-when-focused hero card, and inline saved progress; the top Snoopy hero illustration stays at the same height.
 - Home menu uses outlined cut-corner frames and the Woodstock footer from the supplied art. Settings retains navigable rows, DynaPuff and the original-scale Snoopy head with one tiny heart.
 - Snoopy uses only bounded footer artwork, not a full-screen background. X3 retains both original footer images byte-for-byte; touch panels display taller compositions using the SAME Woodstock/slogan/cloud and Snoopy doghouse/grass-line artwork. Other themes can still use the firmware background capability.
-- Sleep artwork comes from the theme (Dark/Light), not a Custom wallpaper pack. The source-art gallery ZIP adds twenty-two Snoopy & Woodstock scenes plus the approved original to **each** device's dedicated gallery, with random selection and no immediate repeats on matching firmware. The original sleep image remains in the gallery.
-- The source defines six device-sized artwork pairs for header emblem, Home hero, Home footer, list footer, boot and sleep. Each installable ZIP contains **only** the matching display's artwork; the X3 CPBs remain byte-identical to the original approved assets. The same installed theme ID is retained for both resolutions. Snoopy requests the firmware-owned Back arrow plus the header emblem on touch push screens (`theme.header-back.v1`); root Home still has no Back arrow. Native Back routing is unchanged. X4 Pro hardware validation is pending.
+- Sleep artwork comes from the theme (Dark/Light), not a Custom wallpaper pack. This release replaces the old twenty-three monochrome scenes with ten bright four-tone grayscale illustrations, scaled separately for X3 and X4+. Scenes rotate randomly without immediate repeats on compatible firmware.
+- The source defines paired monochrome UI artwork plus a new grayscale Snoopy USB-C cable illustration and device-sized sleep gallery. Each installable ZIP contains **only** the matching display's artwork; the X3 CPBs remain byte-identical to the original approved assets. The same installed theme ID is retained for both resolutions. Snoopy requests the firmware-owned Back arrow plus the header emblem on touch push screens (`theme.header-back.v1`); root Home still has no Back arrow. Native Back routing is unchanged. X4 Pro hardware validation is pending.
 - The home mockup's multi-book gallery, custom apps, red doghouse and yellow character are **not** theme-contract features; they are not promised by this package.
 
 Unofficial, non-commercial fan-made theme using AI-generated illustrations. Snoopy, Woodstock and Peanuts remain trademarks and copyrighted characters of their respective owners. This is not an official or endorsed Peanuts product.

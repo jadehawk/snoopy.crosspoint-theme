@@ -11,7 +11,7 @@ import zlib
 ROOT=Path(__file__).resolve().parents[1]
 PACK=ROOT/'snoopy.crosspoint-theme'
 GALLERY=ROOT/'source-art/Snoopy_Woodstock_22_Sleep_Scenes_X3_X4Pro.zip'
-VERSION='0.1.15'
+VERSION='0.1.16'
 ZIPDIR=ROOT/'dist'
 
 class ThemeChecks(unittest.TestCase):
@@ -34,7 +34,7 @@ class ThemeChecks(unittest.TestCase):
         self.assertEqual(m['styles']['settings_navigation'],'list')
         self.assertEqual(m['styles']['header_back_style'],'both')
         self.assertIn('theme.header-back.v1', json.loads((PACK/'manifest.json').read_text())['themes'][0]['requires'])
-        for role in ('header_emblem','home_hero','home_footer','screen_art','boot_art','sleep_art'):
+        for role in ('header_emblem','home_hero','home_footer','screen_art','boot_art'):
             alternate = 'screen_art_touch' if role == 'screen_art' else role + '_touch'
             self.assertIn(role,m['assets'])
             self.assertIn(alternate,m['assets'])
@@ -73,7 +73,7 @@ class ThemeChecks(unittest.TestCase):
 
     def test_cpb_crc_dimensions(self):
         for name,wh in [('header-emblem.cpb',(76,58)),('header-emblem-touch.cpb',(76,58)),('home-hero.cpb',(528,320)),('home-hero-touch.cpb',(480,320)),('home-footer.cpb',(528,46)),('screen-decoration.cpb',(528,84)),('home-footer-touch.cpb',(480,80)),('screen-decoration-touch.cpb',(480,128)),
-                        ('boot-art.cpb',(320,235)),('boot-art-touch.cpb',(480,270)),('sleep-night.cpb',(528,792)),('sleep-night-touch.cpb',(480,800))]:
+                        ('boot-art.cpb',(320,235)),('boot-art-touch.cpb',(480,270))]:
             with self.subTest(name=name):
                 blob=(PACK/'themes/snoopy/assets'/name).read_bytes()
                 sig,version,flags,w,h,stride,length,crc=struct.unpack('<4sBBHHHII',blob[:20])
@@ -98,26 +98,24 @@ class ThemeChecks(unittest.TestCase):
         self.assertNotIn("touch_sleep = sleep_mono.resize",builder)
 
     def test_sleep_gallery_contract(self):
+        import zipfile
+        from PIL import Image
         scene=json.loads((PACK/'themes/snoopy/theme.json').read_text())
-        base=scene['assets']['sleep_art']
-        touch=scene['assets']['sleep_art_touch']
-        if GALLERY.is_file():
-            self.assertEqual(len(base),23)
-            self.assertEqual(len(touch),23)
-            self.assertEqual(len(set(base)),23)
-            self.assertEqual(len(set(touch)),23)
-            for n in range(1,23):
-                for suffix,dimensions in (('',(528,792)),('-touch',(480,800))):
-                    cpb=PACK/'themes/snoopy/assets'/f'sleep-scene-{n:02d}{suffix}.cpb'
-                    self.assertTrue(cpb.is_file())
-                    blob=cpb.read_bytes()
-                    header=struct.unpack('<4sBBHHHII',blob[:20])
-                    self.assertEqual(header[0],b'CPTB')
-                    self.assertEqual(header[3:5],dimensions)
-                    self.assertEqual(header[7],zlib.crc32(blob[20:]) & 0xffffffff)
-        else:
-            self.assertEqual(len(base),1)
-            self.assertEqual(touch,['themes/snoopy/assets/sleep-night-touch.cpb'])
+        self.assertEqual(scene['assets']['sleep_art'], 'themes/snoopy/sleep')
+        self.assertNotIn('sleep_art_touch', scene['assets'])
+        caps=json.loads((PACK/'manifest.json').read_text())['themes'][0]['requires']
+        self.assertIn('theme.sleep-grayscale.v1', caps)
+        for profile, size in (('x3',(528,792)),('x4plus',(480,800))):
+            path=ZIPDIR/f'snoopy-{profile}-{VERSION}.crosspoint-theme.zip'
+            with zipfile.ZipFile(path) as archive:
+                images=[n for n in archive.namelist() if '/sleep/' in n]
+                self.assertEqual(len(images),10)
+                self.assertTrue(all(n.endswith('.bmp') for n in images))
+                for name in images:
+                    import io
+                    with Image.open(io.BytesIO(archive.read(name))) as im:
+                        self.assertEqual(im.size, size)
+                        self.assertLessEqual(len(set(im.convert('L').get_flattened_data())),4)
 
     def test_original_x3_footers_remain_byte_identical(self):
         for name, expected in (
@@ -131,10 +129,8 @@ class ThemeChecks(unittest.TestCase):
                 asset=(PACK/'themes/snoopy/assets'/name).read_bytes()
                 self.assertEqual(hashlib.sha256(asset).hexdigest(), expected)
 
-    def test_approved_sleep_art_unchanged(self):
-        blob=(PACK/'themes/snoopy/assets/sleep-night.cpb').read_bytes()
-        self.assertEqual(hashlib.sha256(blob).hexdigest().upper(),
-                         'AC0D60975065650FBACE7ECE7E0927F192A8042B1153054BE10C2C9DA87A47AD')
+    def test_legacy_sleep_art_removed(self):
+        self.assertFalse(list((PACK/'themes/snoopy/assets').glob('sleep-*.cpb')))
 
     def test_dynapuff_ellipsis_in_every_ui_font(self):
         for name in ('ui-small', 'ui-regular', 'ui-large', 'display'):
@@ -188,7 +184,7 @@ class ThemeChecks(unittest.TestCase):
                     root+f for f in manifest["files"]} |
                     {n for n in archive.namelist() if "/sleep/" in n})
                 self.assertEqual(theme["assets"]["sleep_art"], "themes/snoopy/sleep")
-                self.assertEqual(len([n for n in archive.namelist() if "/sleep/" in n]), 23)
-                self.assertEqual(len(manifest["files"]), 14)
+                self.assertEqual(len([n for n in archive.namelist() if "/sleep/" in n]), 10)
+                self.assertEqual(len(manifest["files"]), 15)
 
 if __name__=='__main__': unittest.main()
