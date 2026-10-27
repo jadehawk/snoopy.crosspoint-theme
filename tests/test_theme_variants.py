@@ -15,7 +15,7 @@ class VariantPackageTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.temp=tempfile.TemporaryDirectory()
-        cls.zips=MODULE.build(ROOT,Path(cls.temp.name),"0.1.14")
+        cls.zips=MODULE.build(ROOT,Path(cls.temp.name),"0.1.15")
 
     @classmethod
     def tearDownClass(cls):
@@ -35,10 +35,10 @@ class VariantPackageTests(unittest.TestCase):
                 self.assertLessEqual(len(names),64)
                 self.assertEqual(scene["assets"]["sleep_art"],"themes/snoopy/sleep")
                 self.assertEqual(len([p for p in names if "/sleep/" in p]),23)
-                for role in ("header_emblem","home_hero","home_footer","screen_art","boot_art","sleep_art"):
+                for role in ("header_emblem","home_hero","home_footer","screen_art","boot_art","sleep_art","usb_art"):
                     self.assertIn(role,scene["assets"])
                 bitmap_paths=[n for n in manifest["files"] if n.endswith(".cpb")]
-                self.assertEqual(len(bitmap_paths),5)
+                self.assertEqual(len(bitmap_paths),6)
                 for path in bitmap_paths:
                     header=z.read(prefix+path)[:20]
                     self.assertEqual(header[:4],b"CPTB")

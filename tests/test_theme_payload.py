@@ -11,7 +11,7 @@ import zlib
 ROOT=Path(__file__).resolve().parents[1]
 PACK=ROOT/'snoopy.crosspoint-theme'
 GALLERY=ROOT/'source-art/Snoopy_Woodstock_22_Sleep_Scenes_X3_X4Pro.zip'
-VERSION='0.1.14'
+VERSION='0.1.15'
 ZIPDIR=ROOT/'dist'
 
 class ThemeChecks(unittest.TestCase):
@@ -189,6 +189,6 @@ class ThemeChecks(unittest.TestCase):
                     {n for n in archive.namelist() if "/sleep/" in n})
                 self.assertEqual(theme["assets"]["sleep_art"], "themes/snoopy/sleep")
                 self.assertEqual(len([n for n in archive.namelist() if "/sleep/" in n]), 23)
-                self.assertEqual(len(manifest["files"]), 13)
+                self.assertEqual(len(manifest["files"]), 14)
 
 if __name__=='__main__': unittest.main()

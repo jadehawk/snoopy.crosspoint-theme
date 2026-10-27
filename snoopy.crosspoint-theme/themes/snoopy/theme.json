@@ -67,6 +67,8 @@
     "screen_art_touch": "themes/snoopy/assets/screen-decoration-touch.cpb",
     "boot_art": "themes/snoopy/assets/boot-art.cpb",
     "boot_art_touch": "themes/snoopy/assets/boot-art-touch.cpb",
+    "usb_art": "themes/snoopy/assets/usb-connected.cpb",
+    "usb_art_touch": "themes/snoopy/assets/usb-connected-touch.cpb",
     "sleep_art": [
       "themes/snoopy/assets/sleep-night.cpb",
       "themes/snoopy/assets/sleep-scene-01.cpb",
@@ -216,6 +218,13 @@
       }
     ],
     "hints": [],
+    "usb": [
+      {
+        "op": "bitmap",
+        "asset": "usb_art",
+        "fit": "contain"
+      }
+    ],
     "screen": [
       {
         "op": "bitmap",

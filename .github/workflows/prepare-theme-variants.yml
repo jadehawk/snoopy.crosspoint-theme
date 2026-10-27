@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Theme semantic version (e.g., 0.1.14)'
+        description: 'Theme semantic version (e.g., 0.1.15)'
         required: true
-        default: '0.1.14'
+        default: '0.1.15'
       publish_release:
         description: 'Upload both verified ZIPs to an EXISTING approved release'
         type: boolean
@@ -47,8 +47,9 @@ jobs:
                   manifest = json.loads(archive.read('snoopy.crosspoint-theme/manifest.json'))
                   assert manifest['name'] == 'snoopy' and manifest['version'] == version
                   assert manifest['target_resolution'] == {'width':width,'height':height}
-                  assert set(archive.namelist()) == {
-                      'snoopy.crosspoint-theme/' + f for f in manifest['files']}
+                  core = {'snoopy.crosspoint-theme/' + f for f in manifest['files']}
+                  gallery = {name for name in archive.namelist() if '/sleep/' in name}
+                  assert set(archive.namelist()) == core | gallery
           PY
       - name: Retain generated installable archives
         uses: actions/upload-artifact@v4

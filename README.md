@@ -4,7 +4,7 @@ An **unofficial, non-commercial fan-made theme** with AI-generated Snoopy and Wo
 
 ## Install
 
-Download the device-matched `snoopy-x3-0.1.14.crosspoint-theme.zip` or `snoopy-x4plus-0.1.14.crosspoint-theme.zip` via The Cantina Store, or extract either ZIP to SD path:
+Download the device-matched `snoopy-x3-0.1.15.crosspoint-theme.zip` or `snoopy-x4plus-0.1.15.crosspoint-theme.zip` via The Cantina Store, or extract either ZIP to SD path:
 
 ```
 /.crosspoint/themes/snoopy.crosspoint-theme/
@@ -27,7 +27,7 @@ Select a firmware Dark/Light sleep screen to test the theme's sleep image; Custo
 - Theme schemas cannot replace the firmware's core Home layout, add new menu actions, draw live book grids, or add touch control on X3.
 - Full-screen theme sleep galleries are used for Dark/Light regular sleep entries, not the independent timed sleep refresh pool.
 - This unofficial, non-commercial theme uses Snoopy and Woodstock characters; all Peanuts character trademarks and copyrights remain with their respective rights holders. It is not endorsed by them.
-- Version 0.1.14 ships independent X3 and X4+ archives under one Snoopy theme identity, each with 23 randomly rotated sleep scenes. X3 artwork is unchanged; hardware testing is ongoing.
+- Version 0.1.15 ships independent X3 and X4+ archives under one Snoopy theme identity, each with 23 randomly rotated sleep scenes. X3 artwork is unchanged; hardware testing is ongoing.
 
 ## Files
 
@@ -36,4 +36,4 @@ Select a firmware Dark/Light sleep screen to test the theme's sleep image; Custo
 - `source-fonts/` contains the upstream DynaPuff TTF and SIL OFL license. Run `python tools/build_fonts.py` before `python tools/build.py` when updating font assets.
 - `previews/` has illustrative X3-size previews, not exact firmware screenshots.
 
-Compatibility is capability-based. Snoopy v0.1.14 additionally requires `theme.book-cover.v1`, `theme.screen-decoration.v1`, `theme.fonts.v1`, and `theme.font-family.v1`; older firmware must reject this feature rather than degrade to a fake book cover. No branded firmware name is a requirement.
+Compatibility is capability-based. Snoopy v0.1.15 additionally requires `theme.book-cover.v1`, `theme.screen-decoration.v1`, `theme.fonts.v1`, and `theme.font-family.v1`; older firmware must reject this feature rather than degrade to a fake book cover. No branded firmware name is a requirement.

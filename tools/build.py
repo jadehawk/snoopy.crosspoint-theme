@@ -218,6 +218,8 @@ files={
   'boot-art-touch.cpb':touch_boot,
   'sleep-night.cpb':sleep_mono,
   'sleep-night-touch.cpb':touch_sleep,
+  'usb-connected.cpb':Image.open(SOURCE/'usb-connected.png').convert('1'),
+  'usb-connected-touch.cpb':ImageOps.pad(Image.open(SOURCE/'usb-connected.png').convert('RGB'),(480,800),color='white',method=Image.Resampling.LANCZOS).convert('1'),
 }
 # Maximum 22-scene paired gallery, in addition to the original sleep artwork.
 # Place the companion ZIP in source-art before rebuilding the test theme.
@@ -278,6 +280,8 @@ scene={
     'screen_art':T+'screen-decoration.cpb','screen_art_touch':T+'screen-decoration-touch.cpb',
      
     'boot_art':T+'boot-art.cpb','boot_art_touch':T+'boot-art-touch.cpb',
+    'usb_art':T+'usb-connected.cpb','usb_art_touch':T+'usb-connected-touch.cpb',
+    'usb_art':T+'usb-connected.cpb','usb_art_touch':T+'usb-connected-touch.cpb',
     'sleep_art':sleep_base_paths,'sleep_art_touch':sleep_touch_paths
   },
  'regions':{
@@ -306,6 +310,7 @@ scene={
       {'op':'bitmap','asset':'sleep_art','anchor':'center','fit':'native'}
    ],
    'hints':[],
+   'usb':[{'op':'bitmap','asset':'usb_art','fit':'contain'}],
    'screen':[
       {'op':'bitmap','asset':'screen_art','anchor':'bottom','fit':'contain',
        'paint':'ink-only','max_width':528,'max_height':84}
@@ -336,7 +341,7 @@ DynaPuff typeface is by The DynaPuff Project Authors and distributed under
 SIL Open Font License 1.1; see DETAILS.md for the complete OFL text.
 '''
 (PKG/'README.md').write_text(readme)
-(PKG/'DETAILS.md').write_text('''# Snoopy - Cozy Reading (v0.1.14)
+(PKG/'DETAILS.md').write_text('''# Snoopy - Cozy Reading (v0.1.15)
 
 Unofficial concept based on the user-provided Snoopy e-reader mockup.
 
@@ -359,10 +364,10 @@ details_path.write_text(details_path.read_text(encoding='utf-8') +
 
 manifest={
  'kind':'theme-pack','name':'snoopy','title':'Snoopy','description':'Cozy monochrome Snoopy-inspired reading theme for device-sized e-ink screens.',
- 'author':'Jadehawk (concept adaptation)','version':'0.1.14',
+ 'author':'Jadehawk (concept adaptation)','version':'0.1.15',
  'license':'Unofficial non-commercial fan theme; Peanuts character rights belong to their respective owners.',
  'themes':[{'id':'snoopy','title':'Snoopy','path':'themes/snoopy/theme.json',
-            'requires':['theme.sd.v1','theme.metrics.v1','theme.images.v1','theme.composition.v1','theme.settings-navigation.v1','theme.book-cover.v1','theme.menu-decoration.v1','theme.screen-decoration.v1','theme.header-back.v1','theme.fonts.v1','theme.font-family.v1','theme.sleep-gallery.v1']}],
+            'requires':['theme.sd.v1','theme.metrics.v1','theme.images.v1','theme.composition.v1','theme.settings-navigation.v1','theme.book-cover.v1','theme.menu-decoration.v1','theme.screen-decoration.v1','theme.header-back.v1','theme.fonts.v1','theme.font-family.v1','theme.sleep-gallery.v1','theme.usb-scene.v1']}],
  'files':['manifest.json','README.md','DETAILS.md','themes/snoopy/theme.json']+
          [T+x for x in files] + sleep_base_paths[1:] + sleep_touch_paths[1:] + ['themes/snoopy/fonts/'+role+'.cpfont' for role in ('ui-small','ui-regular','ui-large','display')]
 }
@@ -373,7 +378,7 @@ An **unofficial, non-commercial fan-made theme** with AI-generated Snoopy and Wo
 
 ## Install
 
-Download the device-matched `snoopy-x3-0.1.14.crosspoint-theme.zip` or `snoopy-x4plus-0.1.14.crosspoint-theme.zip` via The Cantina Store, or extract either ZIP to SD path:
+Download the device-matched `snoopy-x3-0.1.15.crosspoint-theme.zip` or `snoopy-x4plus-0.1.15.crosspoint-theme.zip` via The Cantina Store, or extract either ZIP to SD path:
 
 ```
 /.crosspoint/themes/snoopy.crosspoint-theme/
@@ -396,7 +401,7 @@ Select a firmware Dark/Light sleep screen to test the theme's sleep image; Custo
 - Theme schemas cannot replace the firmware's core Home layout, add new menu actions, draw live book grids, or add touch control on X3.
 - Full-screen theme sleep galleries are used for Dark/Light regular sleep entries, not the independent timed sleep refresh pool.
 - This unofficial, non-commercial theme uses Snoopy and Woodstock characters; all Peanuts character trademarks and copyrights remain with their respective rights holders. It is not endorsed by them.
-- Version 0.1.14 ships independent X3 and X4+ archives under one Snoopy theme identity, each with 23 randomly rotated sleep scenes. X3 artwork is unchanged; hardware testing is ongoing.
+- Version 0.1.15 ships independent X3 and X4+ archives under one Snoopy theme identity, each with 23 randomly rotated sleep scenes. X3 artwork is unchanged; hardware testing is ongoing.
 
 ## Files
 
@@ -405,7 +410,7 @@ Select a firmware Dark/Light sleep screen to test the theme's sleep image; Custo
 - `source-fonts/` contains the upstream DynaPuff TTF and SIL OFL license. Run `python tools/build_fonts.py` before `python tools/build.py` when updating font assets.
 - `previews/` has illustrative X3-size previews, not exact firmware screenshots.
 
-Compatibility is capability-based. Snoopy v0.1.14 additionally requires `theme.book-cover.v1`, `theme.screen-decoration.v1`, `theme.fonts.v1`, and `theme.font-family.v1`; older firmware must reject this feature rather than degrade to a fake book cover. No branded firmware name is a requirement.
+Compatibility is capability-based. Snoopy v0.1.15 additionally requires `theme.book-cover.v1`, `theme.screen-decoration.v1`, `theme.fonts.v1`, and `theme.font-family.v1`; older firmware must reject this feature rather than degrade to a fake book cover. No branded firmware name is a requirement.
 ''')
 # Approximate X3 previews only. Keep firmware-owned book/menu labels, touch
 # targets, real battery, and row selection distinct from static theme artwork.
@@ -470,7 +475,7 @@ assert sum((PKG/f).stat().st_size for f in manifest['files'])<4*1024*1024
 assert (PKG/'README.md').stat().st_size<2048
 assert all((PKG/f).is_file() for f in manifest['files'])
 for generated in (PKG/'README.md', PKG/'DETAILS.md', OUT/'README.md'):
-    generated.write_text(generated.read_text(encoding='utf-8').replace('0.1.11','0.1.14'),encoding='utf-8')
+    generated.write_text(generated.read_text(encoding='utf-8').replace('0.1.11','0.1.15'),encoding='utf-8')
 # Source payload stays combined for authoring and regression tests; the
 # installable packages each contain only one resolution's CPBs.
 from pack_theme_variants import build as pack_resolution_variants
