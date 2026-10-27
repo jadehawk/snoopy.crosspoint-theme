@@ -1,4 +1,4 @@
-# Snoopy - Cozy Reading (v0.1.17)
+# Snoopy - Cozy Reading (v0.1.18)
 
 Unofficial concept based on the user-provided Snoopy e-reader mockup.
 

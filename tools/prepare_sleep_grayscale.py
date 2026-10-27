@@ -1,5 +1,6 @@
 """Prepare crisp, bright native four-tone Snoopy sleep BMPs for each display."""
 from pathlib import Path
+import struct
 from PIL import Image, ImageOps
 
 PROFILES = {"x3": (528, 792), "x4plus": (480, 800)}
@@ -10,6 +11,52 @@ def source_files():
     if len(files) != 10:
         raise ValueError(f"Expected 10 approved Snoopy sleep sources, found {len(files)}")
     return files
+
+def write_native_2bpp_bmp(indices: Image.Image, target: Path) -> None:
+    """Write the same compact native-gray BMP used by the Star Wars pack.
+
+    Packing the four pixel levels into 2 bits saves 75% of uncompressed SD
+    space compared to Pillow's 8-bit indexed BMPs, with identical gray pixels.
+    """
+    width, height = indices.size
+    assert indices.mode == "P"
+    # Quantization palette indices are ordered by color frequency, not shade.
+    entries = indices.getpalette()
+    by_brightness = sorted(range(4), key=lambda index: entries[index * 3])
+    to_native_level = {palette_index: level for level, palette_index in enumerate(by_brightness)}
+    pixels = bytes(to_native_level[index] for index in indices.get_flattened_data())
+    stride = ((width * 2 + 31) // 32) * 4
+    pixel_data = bytearray(stride * height)
+    for y in range(height):
+        row = (height - 1 - y) * stride
+        for x in range(width):
+            pixel_data[row + x // 4] |= pixels[y * width + x] << (6 - 2 * (x % 4))
+    palette = b"".join(bytes((shade, shade, shade, 0)) for shade in (0, 85, 170, 255))
+    offset = 14 + 40 + len(palette)
+    header = struct.pack("<2sIHHI", b"BM", offset + len(pixel_data), 0, 0, offset)
+    dib = struct.pack("<IiiHHIIiiII", 40, width, height, 1, 2, 0,
+                      len(pixel_data), 2835, 2835, 4, 4)
+    target.write_bytes(header + dib + palette + pixel_data)
+
+
+def decode_native_2bpp_bmp(data: bytes) -> Image.Image:
+    """Decode the four-tone BMP for host tests (Pillow cannot open 2bpp BMP)."""
+    assert len(data) >= 70 and data[:2] == b"BM"
+    file_size, offset = struct.unpack_from("<I", data, 2)[0], struct.unpack_from("<I", data, 10)[0]
+    dib_size, width, height, planes, bpp, compression = struct.unpack_from("<IiiHHI", data, 14)
+    assert file_size == len(data) and dib_size == 40 and planes == 1
+    assert width > 0 and height > 0 and bpp == 2 and compression == 0 and offset == 70
+    assert data[54:70] == b"".join(bytes((v, v, v, 0)) for v in (0, 85, 170, 255))
+    stride = ((width * 2 + 31) // 32) * 4
+    assert len(data) - offset == stride * height
+    result = bytearray(width * height)
+    for y in range(height):
+        start = offset + (height - 1 - y) * stride
+        for x in range(width):
+            level = (data[start + x // 4] >> (6 - (x % 4) * 2)) & 0x03
+            result[y * width + x] = level * 85
+    return Image.frombytes("L", (width, height), bytes(result))
+
 
 def create(root: Path):
     images = source_files()
@@ -30,23 +77,16 @@ def create(root: Path):
                 # Gently brighten darker phone wallpapers; keep light backgrounds clean.
                 gray = gray.point(lambda v: min(255, round(255 * (v / 255) ** 0.82)))
                 image4 = gray.quantize(colors=4, dither=Image.Dither.FLOYDSTEINBERG)
-                # Palette quantize() with 252 duplicate white entries collapses
-                # to 1-bit on some Pillow versions. Remap four distinct
-                # perceptual buckets to the panel's exact four native tones.
-                original_palette = image4.getpalette()
-                rank = sorted(range(4), key=lambda i: original_palette[i * 3])
-                native = [255] * 256
-                for level, palette_index in enumerate(rank):
-                    native[palette_index] = shades[level]
-                image4.putpalette([v for i in range(256) for v in (native[i],) * 3])
+                # Preserve the same four quantized levels but store only two
+                # bits per pixel, as the hardware and Star Wars wallpaper do.
                 name = f"sleep-scene-{index:02d}.bmp"
                 target = root / "dist" / "sleep-grayscale" / variant / name
                 target.parent.mkdir(parents=True, exist_ok=True)
-                image4.save(target, format="BMP")
+                write_native_2bpp_bmp(image4, target)
                 # Check dimensions, palette & brightness after encoding.
-                with Image.open(target) as check:
-                    if check.size != dimensions or set(check.convert("L").get_flattened_data()) != set(shades):
-                        raise ValueError(f"Invalid native 4-gray BMP: {target}")
+                check = decode_native_2bpp_bmp(target.read_bytes())
+                if check.size != dimensions or set(check.get_flattened_data()) != set(shades):
+                    raise ValueError(f"Invalid native 4-gray BMP: {target}")
                 collection["themes/snoopy/sleep/" + name] = target.read_bytes()
         output[variant] = collection
     return output

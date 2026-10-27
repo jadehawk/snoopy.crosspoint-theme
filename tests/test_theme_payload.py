@@ -11,7 +11,7 @@ import zlib
 ROOT=Path(__file__).resolve().parents[1]
 PACK=ROOT/'snoopy.crosspoint-theme'
 GALLERY=ROOT/'source-art/Snoopy_Woodstock_22_Sleep_Scenes_X3_X4Pro.zip'
-VERSION='0.1.17'
+VERSION='0.1.18'
 ZIPDIR=ROOT/'dist'
 
 class ThemeChecks(unittest.TestCase):
@@ -99,7 +99,7 @@ class ThemeChecks(unittest.TestCase):
 
     def test_sleep_gallery_contract(self):
         import zipfile
-        from PIL import Image
+        from tools.prepare_sleep_grayscale import decode_native_2bpp_bmp
         scene=json.loads((PACK/'themes/snoopy/theme.json').read_text())
         self.assertEqual(scene['assets']['sleep_art'], 'themes/snoopy/sleep')
         self.assertNotIn('sleep_art_touch', scene['assets'])
@@ -113,9 +113,13 @@ class ThemeChecks(unittest.TestCase):
                 self.assertTrue(all(n.endswith('.bmp') for n in images))
                 for name in images:
                     import io
-                    with Image.open(io.BytesIO(archive.read(name))) as im:
-                        self.assertEqual(im.size, size)
-                        self.assertLessEqual(len(set(im.convert('L').get_flattened_data())),4)
+                    data = archive.read(name)
+                    im = decode_native_2bpp_bmp(data)
+                    self.assertEqual(im.size, size)
+                    self.assertEqual(set(im.get_flattened_data()), {0, 85, 170, 255})
+                    self.assertEqual(int.from_bytes(data[28:30], 'little'), 2)
+                    if profile == 'x3':
+                        self.assertEqual(archive.getinfo(name).compress_type, zipfile.ZIP_STORED)
 
     def test_original_x3_footers_remain_byte_identical(self):
         for name, expected in (

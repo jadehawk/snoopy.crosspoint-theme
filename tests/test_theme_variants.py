@@ -28,7 +28,7 @@ class VariantPackageTests(unittest.TestCase):
                 assert cover.call_count == 20, "all 10 sleep scenes need an X3 and X4+ full-bleed crop"
                 return images
         with patch.object(MODULE, "prepare_sleep_grayscale", side_effect=checked_sleep):
-            cls.zips=MODULE.build(ROOT,Path(cls.temp.name),"0.1.17")
+            cls.zips=MODULE.build(ROOT,Path(cls.temp.name),"0.1.18")
 
     @classmethod
     def tearDownClass(cls):
@@ -57,8 +57,13 @@ class VariantPackageTests(unittest.TestCase):
                     self.assertEqual(header[:4],b"CPTB")
                     # Source gallery should never include the other resolution.
                     self.assertEqual(path.endswith("-touch.cpb"),variant=="x4plus")
-                sleep=z.read(prefix+"themes/snoopy/sleep/sleep-scene-01.bmp")
+                sleep_path=prefix+"themes/snoopy/sleep/sleep-scene-01.bmp"
+                sleep=z.read(sleep_path)
                 self.assertEqual(sleep[:2], b'BM')
+                self.assertEqual(int.from_bytes(sleep[28:30], 'little'), 2)
+                if variant == "x3":
+                    self.assertTrue(all(item.compress_type == zipfile.ZIP_STORED for item in z.infolist()))
+                    self.assertLess(z.fp.seek(0, 2), 2 * 1024 * 1024)
                 self.assertIn('theme.usb-grayscale.v1', manifest['themes'][0]['requires'])
                 self.assertIn('theme.sleep-grayscale.v1', manifest['themes'][0]['requires'])
                 gray_path=scene['assets']['usb_gray_art']

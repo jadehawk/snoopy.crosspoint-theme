@@ -1,6 +1,6 @@
 """Build one verified device-sized Snoopy theme ZIP per display profile.
 
-The 10 source sleep images are translated to native four-tone BMPs separately for
+The 10 source sleep images are translated to compact native 2bpp BMPs separately for
 each resolution. USB grayscale images and CPB fallback remain ordinary manifest
 assets. No cross-resolution galleries or legacy 1-bit sleep art are distributed.
 """
@@ -81,7 +81,13 @@ def build(root: Path, output: Path, version: str) -> list[Path]:
                 return raw.replace(master["version"].encode(), version.encode())
             return raw
 
-        with zipfile.ZipFile(archive_path, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
+        # X3 has no PSRAM; its streaming DEFLATE path needs a contiguous
+        # 32-KiB inflate window, which often cannot be allocated after TLS.
+        # Stored entries copy directly to SD in 1-KiB chunks. Compact 2bpp
+        # BMPs keep the uncompressed archive well within firmware limits.
+        method = zipfile.ZIP_STORED if variant == "x3" else zipfile.ZIP_DEFLATED
+        with zipfile.ZipFile(archive_path, "w", method,
+                             compresslevel=None if method == zipfile.ZIP_STORED else 9) as archive:
             for name in sorted(set(manifest["files"]) | set(sleep_images)):
                 archive.writestr(
                     "snoopy.crosspoint-theme/" + name,

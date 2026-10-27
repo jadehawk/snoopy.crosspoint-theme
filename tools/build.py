@@ -322,7 +322,7 @@ DynaPuff typeface is by The DynaPuff Project Authors and distributed under
 SIL Open Font License 1.1; see DETAILS.md for the complete OFL text.
 '''
 (PKG/'README.md').write_text(readme)
-(PKG/'DETAILS.md').write_text('''# Snoopy - Cozy Reading (v0.1.17)
+(PKG/'DETAILS.md').write_text('''# Snoopy - Cozy Reading (v0.1.18)
 
 Unofficial concept based on the user-provided Snoopy e-reader mockup.
 
@@ -345,7 +345,7 @@ details_path.write_text(details_path.read_text(encoding='utf-8') +
 
 manifest={
  'kind':'theme-pack','name':'snoopy','title':'Snoopy','description':'Cozy Snoopy theme with grayscale USB and sleep illustrations for e-ink screens.',
- 'author':'Jadehawk (concept adaptation)','version':'0.1.17',
+ 'author':'Jadehawk (concept adaptation)','version':'0.1.18',
  'license':'Unofficial non-commercial fan theme; Peanuts character rights belong to their respective owners.',
  'themes':[{'id':'snoopy','title':'Snoopy','path':'themes/snoopy/theme.json',
             'requires':['theme.sd.v1','theme.metrics.v1','theme.images.v1','theme.composition.v1','theme.settings-navigation.v1','theme.book-cover.v1','theme.menu-decoration.v1','theme.screen-decoration.v1','theme.header-back.v1','theme.fonts.v1','theme.font-family.v1','theme.sleep-gallery.v1','theme.sleep-grayscale.v1','theme.usb-scene.v1','theme.usb-grayscale.v1']}],
@@ -359,7 +359,7 @@ An **unofficial, non-commercial fan-made theme** with AI-generated Snoopy and Wo
 
 ## Install
 
-Download the device-matched `snoopy-x3-0.1.17.crosspoint-theme.zip` or `snoopy-x4plus-0.1.17.crosspoint-theme.zip` via The Cantina Store, or extract either ZIP to SD path:
+Download the device-matched `snoopy-x3-0.1.18.crosspoint-theme.zip` or `snoopy-x4plus-0.1.18.crosspoint-theme.zip` via The Cantina Store, or extract either ZIP to SD path:
 
 ```
 /.crosspoint/themes/snoopy.crosspoint-theme/
@@ -382,7 +382,7 @@ Select a firmware Dark/Light sleep screen to test the theme's sleep image; Custo
 - Theme schemas cannot replace the firmware's core Home layout, add new menu actions, draw live book grids, or add touch control on X3.
 - Full-screen theme sleep galleries are used for Dark/Light regular sleep entries, not the independent timed sleep refresh pool.
 - This unofficial, non-commercial theme uses Snoopy and Woodstock characters; all Peanuts character trademarks and copyrights remain with their respective rights holders. It is not endorsed by them.
-- Version 0.1.17 ships independent X3 and X4+ archives with 10 full-screen, edge-to-edge grayscale sleep scenes and native grayscale USB artwork. Hardware verification of this crop correction is pending.
+- Version 0.1.18 preserves all ten full-bleed four-tone scenes, now encoded as compact 2-bit BMPs. X3 uses ZIP_STORED to avoid the 32 KiB decompression window on devices without PSRAM; X4+ retains compressed ZIP entries. Native grayscale USB artwork is unchanged. X3 update needs hardware verification.
 
 ## Files
 
@@ -391,7 +391,7 @@ Select a firmware Dark/Light sleep screen to test the theme's sleep image; Custo
 - `source-fonts/` contains the upstream DynaPuff TTF and SIL OFL license. Run `python tools/build_fonts.py` before `python tools/build.py` when updating font assets.
 - `previews/` has illustrative X3-size previews, not exact firmware screenshots.
 
-Compatibility is capability-based. Snoopy v0.1.17 requires `theme.sleep-grayscale.v1` and `theme.usb-grayscale.v1` as well as the declared standard theme capabilities; only firmware exposing all required capabilities should install the theme. No branded firmware name is a requirement.
+Compatibility is capability-based. Snoopy v0.1.18 requires `theme.sleep-grayscale.v1` and `theme.usb-grayscale.v1` as well as the declared standard theme capabilities; only firmware exposing all required capabilities should install the theme. No branded firmware name is a requirement.
 ''')
 # Approximate X3 previews only. Keep firmware-owned book/menu labels, touch
 # targets, real battery, and row selection distinct from static theme artwork.
@@ -456,7 +456,7 @@ assert sum((PKG/f).stat().st_size for f in manifest['files'])<4*1024*1024
 assert (PKG/'README.md').stat().st_size<2048
 assert all((PKG/f).is_file() for f in manifest['files'])
 for generated in (PKG/'README.md', PKG/'DETAILS.md', OUT/'README.md'):
-    generated.write_text(generated.read_text(encoding='utf-8').replace('0.1.11','0.1.17'),encoding='utf-8')
+    generated.write_text(generated.read_text(encoding='utf-8').replace('0.1.11','0.1.18'),encoding='utf-8')
 # Source payload stays combined for authoring and regression tests; the
 # installable packages each contain only one resolution's CPBs.
 from pack_theme_variants import build as pack_resolution_variants

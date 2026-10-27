@@ -4,7 +4,7 @@ An **unofficial, non-commercial fan-made theme** with AI-generated Snoopy and Wo
 
 ## Install
 
-Download the device-matched `snoopy-x3-0.1.17.crosspoint-theme.zip` or `snoopy-x4plus-0.1.17.crosspoint-theme.zip` via The Cantina Store, or extract either ZIP to SD path:
+Download the device-matched `snoopy-x3-0.1.18.crosspoint-theme.zip` or `snoopy-x4plus-0.1.18.crosspoint-theme.zip` via The Cantina Store, or extract either ZIP to SD path:
 
 ```
 /.crosspoint/themes/snoopy.crosspoint-theme/
@@ -27,7 +27,7 @@ Select a firmware Dark/Light sleep screen to test the theme's sleep image; Custo
 - Theme schemas cannot replace the firmware's core Home layout, add new menu actions, draw live book grids, or add touch control on X3.
 - Full-screen theme sleep galleries are used for Dark/Light regular sleep entries, not the independent timed sleep refresh pool.
 - This unofficial, non-commercial theme uses Snoopy and Woodstock characters; all Peanuts character trademarks and copyrights remain with their respective rights holders. It is not endorsed by them.
-- Version 0.1.17 ships independent X3 and X4+ archives with 10 full-screen, edge-to-edge grayscale sleep scenes and native grayscale USB artwork. Hardware verification of this crop correction is pending.
+- Version 0.1.18 preserves all ten full-bleed four-tone scenes, now encoded as compact 2-bit BMPs. X3 uses ZIP_STORED to avoid the 32 KiB decompression window on devices without PSRAM; X4+ retains compressed ZIP entries. Native grayscale USB artwork is unchanged. X3 update needs hardware verification.
 
 ## Files
 
@@ -36,4 +36,4 @@ Select a firmware Dark/Light sleep screen to test the theme's sleep image; Custo
 - `source-fonts/` contains the upstream DynaPuff TTF and SIL OFL license. Run `python tools/build_fonts.py` before `python tools/build.py` when updating font assets.
 - `previews/` has illustrative X3-size previews, not exact firmware screenshots.
 
-Compatibility is capability-based. Snoopy v0.1.17 requires `theme.sleep-grayscale.v1` and `theme.usb-grayscale.v1` as well as the declared standard theme capabilities; only firmware exposing all required capabilities should install the theme. No branded firmware name is a requirement.
+Compatibility is capability-based. Snoopy v0.1.18 requires `theme.sleep-grayscale.v1` and `theme.usb-grayscale.v1` as well as the declared standard theme capabilities; only firmware exposing all required capabilities should install the theme. No branded firmware name is a requirement.
