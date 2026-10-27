@@ -15,7 +15,7 @@ class VariantPackageTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.temp=tempfile.TemporaryDirectory()
-        cls.zips=MODULE.build(ROOT,Path(cls.temp.name),"0.1.13")
+        cls.zips=MODULE.build(ROOT,Path(cls.temp.name),"0.1.14")
 
     @classmethod
     def tearDownClass(cls):
@@ -30,19 +30,21 @@ class VariantPackageTests(unittest.TestCase):
                 scene=json.loads(z.read(prefix+"themes/snoopy/theme.json"))
                 self.assertEqual(manifest["name"],"snoopy")
                 self.assertEqual(manifest["target_resolution"],dict(zip(("width","height"),size)))
-                self.assertEqual(names,{prefix+n for n in manifest["files"]})
+                self.assertEqual(names,{prefix+n for n in manifest["files"]} |
+                                 {n for n in names if "/sleep/" in n})
                 self.assertLessEqual(len(names),64)
-                self.assertEqual(len(scene["assets"]["sleep_art"]),23)
+                self.assertEqual(scene["assets"]["sleep_art"],"themes/snoopy/sleep")
+                self.assertEqual(len([p for p in names if "/sleep/" in p]),23)
                 for role in ("header_emblem","home_hero","home_footer","screen_art","boot_art","sleep_art"):
                     self.assertIn(role,scene["assets"])
                 bitmap_paths=[n for n in manifest["files"] if n.endswith(".cpb")]
-                self.assertEqual(len(bitmap_paths),28)
+                self.assertEqual(len(bitmap_paths),5)
                 for path in bitmap_paths:
                     header=z.read(prefix+path)[:20]
                     self.assertEqual(header[:4],b"CPTB")
                     # Source gallery should never include the other resolution.
                     self.assertEqual(path.endswith("-touch.cpb"),variant=="x4plus")
-                sleep=z.read(prefix+scene["assets"]["sleep_art"][0])
+                sleep=z.read(prefix+"themes/snoopy/sleep/sleep-night.cpb")
                 self.assertEqual(struct.unpack_from("<HH",sleep,6),size)
 
     def test_no_duplicate_artwork(self):
@@ -51,7 +53,11 @@ class VariantPackageTests(unittest.TestCase):
             with zipfile.ZipFile(path) as archive:
                 names=[p for p in archive.namelist() if p.endswith(".cpb")]
                 sources.append(set(names))
-        self.assertFalse(sources[0] & sources[1])
+        # Variant ZIPs intentionally share stable theme-local sleep filenames;
+        # their CPB pixel payloads differ by display geometry.
+        self.assertEqual(sources[0] & sources[1],
+                         {p for p in sources[0] if '/sleep/' in p})
+        self.assertEqual(len(sources[0] & sources[1]), 23)
 
 if __name__=="__main__":
     unittest.main()

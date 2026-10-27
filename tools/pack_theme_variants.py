@@ -33,12 +33,26 @@ def build(root: Path, output: Path, version: str) -> list[Path]:
                     assets.pop(key)
         if variant == "x3":
             theme["styles"].pop("menu_footer_touch_asset", None)
-        # Keep _touch aliases in X4+ because older drawable primitives use
-        # them to calculate the independent taller footer and full canvas.
+        # A sleep gallery is a directory, not a JSON list. It can contain any
+        # number of CPBs within the verified archive and expanded-size budgets.
+        sleep_sources = (original["assets"]["sleep_art_touch"] if variant == "x4plus"
+                         else original["assets"]["sleep_art"])
+        assets.pop("sleep_art_touch", None)
+        assets["sleep_art"] = "themes/snoopy/sleep"
+        # Keep the other optional touch aliases: they control full-height Home
+        # footer sizing and boot artwork without duplicate binary files.
         referenced = set()
-        for value in assets.values():
-            paths = value if isinstance(value, list) else [value]
-            referenced.update(paths)
+        for role, value in assets.items():
+            if role == "sleep_art":
+                continue
+            assert isinstance(value, str), role
+            referenced.add(value)
+        sleep_images = {}
+        for source in sleep_sources:
+            basename = Path(source).name.replace("-touch.cpb", ".cpb")
+            target = "themes/snoopy/sleep/" + basename
+            assert target not in sleep_images
+            sleep_images[target] = (package / source).read_bytes()
         manifest = copy.deepcopy(master)
         manifest["version"] = version
         manifest["target_resolution"] = {"width": width, "height": height}
@@ -49,7 +63,8 @@ def build(root: Path, output: Path, version: str) -> list[Path]:
         assert all((package / file).is_file() for file in manifest["files"])
         expected = {f"themes/snoopy/assets/{p.name}" for p in
                     (package / "themes/snoopy/assets").glob("*.cpb")
-                    if p.name.endswith("-touch.cpb") == (variant == "x4plus")}
+                    if not p.name.startswith(("sleep-night", "sleep-scene-")) and
+                    p.name.endswith("-touch.cpb") == (variant == "x4plus")}
         assert set(referenced) == expected, (variant, sorted(set(referenced)^expected))
         output.mkdir(parents=True, exist_ok=True)
         filename = output / f"snoopy-{variant}-{version}.crosspoint-theme.zip"
@@ -63,14 +78,16 @@ def build(root: Path, output: Path, version: str) -> list[Path]:
                 return raw.replace(master["version"].encode(), version.encode())
             return raw
         with zipfile.ZipFile(filename, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
-            for name in manifest["files"]:
-                archive.writestr(f"snoopy.crosspoint-theme/{name}", data(name))
+            for name in sorted(set(manifest["files"]) | set(sleep_images)):
+                archive.writestr(f"snoopy.crosspoint-theme/{name}",
+                                 sleep_images[name] if name in sleep_images else data(name))
         with zipfile.ZipFile(filename) as archive:
             names = archive.namelist()
-            assert len(names) == len(manifest["files"])
-            assert set(names) == {f"snoopy.crosspoint-theme/{f}" for f in manifest["files"]}
+            assert len(names) == len(manifest["files"]) + len(sleep_images)
+            assert set(names) == {f"snoopy.crosspoint-theme/{f}" for f in
+                                  (set(manifest["files"]) | set(sleep_images))}
         results.append(filename)
-        print(f"{variant}: {filename.name} ({filename.stat().st_size} bytes, {len(manifest['files'])} files)")
+        print(f"{variant}: {filename.name} ({filename.stat().st_size} bytes, {len(manifest['files'])} core and {len(sleep_images)} sleep CPBs)")
     return results
 
 if __name__ == "__main__":

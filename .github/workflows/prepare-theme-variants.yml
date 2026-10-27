@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Theme semantic version (e.g., 0.1.13)'
+        description: 'Theme semantic version (e.g., 0.1.14)'
         required: true
-        default: '0.1.13'
+        default: '0.1.14'
       publish_release:
         description: 'Upload both verified ZIPs to an EXISTING approved release'
         type: boolean

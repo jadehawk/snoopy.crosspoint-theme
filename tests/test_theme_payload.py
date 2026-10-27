@@ -11,7 +11,7 @@ import zlib
 ROOT=Path(__file__).resolve().parents[1]
 PACK=ROOT/'snoopy.crosspoint-theme'
 GALLERY=ROOT/'source-art/Snoopy_Woodstock_22_Sleep_Scenes_X3_X4Pro.zip'
-VERSION='0.1.13'
+VERSION='0.1.14'
 ZIPDIR=ROOT/'dist'
 
 class ThemeChecks(unittest.TestCase):
@@ -185,8 +185,10 @@ class ThemeChecks(unittest.TestCase):
                 self.assertEqual(manifest["target_resolution"],{
                     "width":size[0],"height":size[1]})
                 self.assertEqual(set(archive.namelist()),{
-                    root+f for f in manifest["files"]})
-                self.assertEqual(len(theme["assets"]["sleep_art"]),23)
-                self.assertEqual(len(manifest["files"]),36)
+                    root+f for f in manifest["files"]} |
+                    {n for n in archive.namelist() if "/sleep/" in n})
+                self.assertEqual(theme["assets"]["sleep_art"], "themes/snoopy/sleep")
+                self.assertEqual(len([n for n in archive.namelist() if "/sleep/" in n]), 23)
+                self.assertEqual(len(manifest["files"]), 13)
 
 if __name__=='__main__': unittest.main()

@@ -4,7 +4,7 @@
   "title": "Snoopy",
   "description": "Cozy monochrome Snoopy-inspired reading theme for device-sized e-ink screens.",
   "author": "Jadehawk (concept adaptation)",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "license": "Unofficial non-commercial fan theme; Peanuts character rights belong to their respective owners.",
   "themes": [
     {
@@ -22,7 +22,8 @@
         "theme.screen-decoration.v1",
         "theme.header-back.v1",
         "theme.fonts.v1",
-        "theme.font-family.v1"
+        "theme.font-family.v1",
+        "theme.sleep-gallery.v1"
       ]
     }
   ],
