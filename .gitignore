@@ -1,0 +1,13 @@
+# Local tooling and agent state
+.venv-theme/
+.ai-bridge/
+.codegraph/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+# Archives are built and uploaded to releases by the publisher.
+dist/
+# Transient editor/system files
+.DS_Store
+Thumbs.db
+*.swp

@@ -1,0 +1,71 @@
+name: Prepare Snoopy theme resolution variants
+
+# Manually dispatched release workflow for this unofficial non-commercial fan theme.
+# No upload to a public GitHub Release without an explicit dispatch choice.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Theme semantic version (e.g., 0.1.13)'
+        required: true
+        default: '0.1.13'
+      publish_release:
+        description: 'Upload both verified ZIPs to an EXISTING approved release'
+        type: boolean
+        default: false
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Dependencies
+        run: python -m pip install --disable-pip-version-check Pillow
+      - name: Generate source art and both device-specific ZIPs
+        run: |
+          python tools/build.py
+          python -m unittest discover -s tests -p test_theme_variants.py
+      - name: Enforce requested version and exact pair of ZIPs
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          python - <<'PY'
+          import os, json, zipfile
+          from pathlib import Path
+          version = os.environ['VERSION']
+          for variant, width, height in [('x3',528,792), ('x4plus',480,800)]:
+              path = Path(f'dist/snoopy-{variant}-{version}.crosspoint-theme.zip')
+              assert path.is_file(), f'Missing release asset: {path}'
+              with zipfile.ZipFile(path) as archive:
+                  manifest = json.loads(archive.read('snoopy.crosspoint-theme/manifest.json'))
+                  assert manifest['name'] == 'snoopy' and manifest['version'] == version
+                  assert manifest['target_resolution'] == {'width':width,'height':height}
+                  assert set(archive.namelist()) == {
+                      'snoopy.crosspoint-theme/' + f for f in manifest['files']}
+          PY
+      - name: Retain generated installable archives
+        uses: actions/upload-artifact@v4
+        with:
+          name: snoopy-theme-variants-${{ inputs.version }}
+          path: |
+            dist/snoopy-x3-${{ inputs.version }}.crosspoint-theme.zip
+            dist/snoopy-x4plus-${{ inputs.version }}.crosspoint-theme.zip
+      - name: Publish to approved existing release only
+        if: ${{ inputs.publish_release }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          tag="v${VERSION}"
+          state=$(gh release view "$tag" --json isDraft,isPrerelease --jq '[.isDraft,.isPrerelease] | join(",")')
+          test "$state" = "false,false"
+          gh release upload "$tag" \
+            "dist/snoopy-x3-${VERSION}.crosspoint-theme.zip" \
+            "dist/snoopy-x4plus-${VERSION}.crosspoint-theme.zip"

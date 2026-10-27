@@ -1,0 +1,239 @@
+{
+  "schema_version": 1,
+  "base": "classic",
+  "reference": {
+    "width": 528,
+    "height": 792,
+    "adapt": "scale-to-fit"
+  },
+  "metrics": {
+    "topPadding": 0,
+    "batteryBarHeight": 20,
+    "headerHeight": 76,
+    "homeTopPadding": 76,
+    "homeCoverHeight": 146,
+    "homeCoverTileHeight": 320,
+    "homeRecentBooksCount": 1,
+    "homeContinueReadingInMenu": false,
+    "homeMenuTopOffset": 12,
+    "contentSidePadding": 14,
+    "previewPadding": 10,
+    "verticalSpacing": 8,
+    "headerSidePadding": 14,
+    "headerUnderlineSize": 1,
+    "headerTitleAlign": 0,
+    "headerBatterySide": 0,
+    "headerShowsClock": false,
+    "headerClockCentered": false,
+    "menuRowHeight": 54,
+    "menuSpacing": 3,
+    "listRowHeight": 62,
+    "listWithSubtitleRowHeight": 72,
+    "listRowGap": 8,
+    "listRowRadius": 16,
+    "listInset": 14,
+    "listSidePadding": 17,
+    "listSeparators": false,
+    "listTitleBold": true,
+    "listSelectionStyle": 1,
+    "buttonHintsHeight": 40,
+    "progressBarHeight": 8,
+    "controlRadius": 14,
+    "sheetRadius": 14,
+    "capsuleRadius": 16
+  },
+  "styles": {
+    "header_background": "white",
+    "header_foreground": "black",
+    "selection": "pill",
+    "row_separators": false,
+    "corners": "rounded",
+    "chamfer_cut": 0,
+    "chamfer_row_cut": 11,
+    "menu_double_outline": true,
+    "menu_footer_asset": "home_footer",
+    "menu_footer_touch_asset": "home_footer_touch",
+    "settings_navigation": "list",
+    "header_back_style": "both"
+  },
+  "assets": {
+    "header_emblem": "themes/snoopy/assets/header-emblem.cpb",
+    "header_emblem_touch": "themes/snoopy/assets/header-emblem-touch.cpb",
+    "home_hero": "themes/snoopy/assets/home-hero.cpb",
+    "home_hero_touch": "themes/snoopy/assets/home-hero-touch.cpb",
+    "home_footer": "themes/snoopy/assets/home-footer.cpb",
+    "home_footer_touch": "themes/snoopy/assets/home-footer-touch.cpb",
+    "screen_art": "themes/snoopy/assets/screen-decoration.cpb",
+    "screen_art_touch": "themes/snoopy/assets/screen-decoration-touch.cpb",
+    "boot_art": "themes/snoopy/assets/boot-art.cpb",
+    "boot_art_touch": "themes/snoopy/assets/boot-art-touch.cpb",
+    "sleep_art": [
+      "themes/snoopy/assets/sleep-night.cpb",
+      "themes/snoopy/assets/sleep-scene-01.cpb",
+      "themes/snoopy/assets/sleep-scene-02.cpb",
+      "themes/snoopy/assets/sleep-scene-03.cpb",
+      "themes/snoopy/assets/sleep-scene-04.cpb",
+      "themes/snoopy/assets/sleep-scene-05.cpb",
+      "themes/snoopy/assets/sleep-scene-06.cpb",
+      "themes/snoopy/assets/sleep-scene-07.cpb",
+      "themes/snoopy/assets/sleep-scene-08.cpb",
+      "themes/snoopy/assets/sleep-scene-09.cpb",
+      "themes/snoopy/assets/sleep-scene-10.cpb",
+      "themes/snoopy/assets/sleep-scene-11.cpb",
+      "themes/snoopy/assets/sleep-scene-12.cpb",
+      "themes/snoopy/assets/sleep-scene-13.cpb",
+      "themes/snoopy/assets/sleep-scene-14.cpb",
+      "themes/snoopy/assets/sleep-scene-15.cpb",
+      "themes/snoopy/assets/sleep-scene-16.cpb",
+      "themes/snoopy/assets/sleep-scene-17.cpb",
+      "themes/snoopy/assets/sleep-scene-18.cpb",
+      "themes/snoopy/assets/sleep-scene-19.cpb",
+      "themes/snoopy/assets/sleep-scene-20.cpb",
+      "themes/snoopy/assets/sleep-scene-21.cpb",
+      "themes/snoopy/assets/sleep-scene-22.cpb"
+    ],
+    "sleep_art_touch": [
+      "themes/snoopy/assets/sleep-night-touch.cpb",
+      "themes/snoopy/assets/sleep-scene-01-touch.cpb",
+      "themes/snoopy/assets/sleep-scene-02-touch.cpb",
+      "themes/snoopy/assets/sleep-scene-03-touch.cpb",
+      "themes/snoopy/assets/sleep-scene-04-touch.cpb",
+      "themes/snoopy/assets/sleep-scene-05-touch.cpb",
+      "themes/snoopy/assets/sleep-scene-06-touch.cpb",
+      "themes/snoopy/assets/sleep-scene-07-touch.cpb",
+      "themes/snoopy/assets/sleep-scene-08-touch.cpb",
+      "themes/snoopy/assets/sleep-scene-09-touch.cpb",
+      "themes/snoopy/assets/sleep-scene-10-touch.cpb",
+      "themes/snoopy/assets/sleep-scene-11-touch.cpb",
+      "themes/snoopy/assets/sleep-scene-12-touch.cpb",
+      "themes/snoopy/assets/sleep-scene-13-touch.cpb",
+      "themes/snoopy/assets/sleep-scene-14-touch.cpb",
+      "themes/snoopy/assets/sleep-scene-15-touch.cpb",
+      "themes/snoopy/assets/sleep-scene-16-touch.cpb",
+      "themes/snoopy/assets/sleep-scene-17-touch.cpb",
+      "themes/snoopy/assets/sleep-scene-18-touch.cpb",
+      "themes/snoopy/assets/sleep-scene-19-touch.cpb",
+      "themes/snoopy/assets/sleep-scene-20-touch.cpb",
+      "themes/snoopy/assets/sleep-scene-21-touch.cpb",
+      "themes/snoopy/assets/sleep-scene-22-touch.cpb"
+    ]
+  },
+  "regions": {
+    "header": [
+      {
+        "op": "fill",
+        "color": "white"
+      },
+      {
+        "op": "bitmap",
+        "asset": "header_emblem",
+        "anchor": "left",
+        "offset": [
+          8,
+          0
+        ],
+        "paint": "ink-only",
+        "fit": "native",
+        "max_width": 76,
+        "max_height": 58
+      },
+      {
+        "op": "text",
+        "source": "screen_title",
+        "font": "ui_bold",
+        "color": "black",
+        "anchor": "left",
+        "offset": [
+          100,
+          0
+        ],
+        "max_width": 265
+      },
+      {
+        "op": "line",
+        "anchor": "bottom",
+        "color": "black",
+        "thickness": 2
+      }
+    ],
+    "home": [
+      {
+        "op": "fill",
+        "color": "white"
+      },
+      {
+        "op": "bitmap",
+        "asset": "home_hero",
+        "anchor": "top",
+        "fit": "contain"
+      },
+      {
+        "op": "book-card",
+        "variant": "cover",
+        "anchor": "bottom",
+        "offset": [
+          0,
+          -7
+        ]
+      }
+    ],
+    "boot": [
+      {
+        "op": "fill",
+        "color": "white"
+      },
+      {
+        "op": "bitmap",
+        "asset": "boot_art",
+        "anchor": "center",
+        "fit": "native",
+        "paint": "ink-only",
+        "max_width": 320,
+        "max_height": 235
+      },
+      {
+        "op": "progress",
+        "source": "loading_percent",
+        "anchor": "bottom",
+        "offset": [
+          0,
+          -95
+        ],
+        "color": "black",
+        "thickness": 5
+      }
+    ],
+    "sleep": [
+      {
+        "op": "fill",
+        "color": "black"
+      },
+      {
+        "op": "bitmap",
+        "asset": "sleep_art",
+        "anchor": "center",
+        "fit": "native"
+      }
+    ],
+    "hints": [],
+    "screen": [
+      {
+        "op": "bitmap",
+        "asset": "screen_art",
+        "anchor": "bottom",
+        "fit": "contain",
+        "paint": "ink-only",
+        "max_width": 528,
+        "max_height": 84
+      }
+    ]
+  },
+  "fonts": {
+    "ui": {
+      "small": "themes/snoopy/fonts/ui-small.cpfont",
+      "regular": "themes/snoopy/fonts/ui-regular.cpfont",
+      "large": "themes/snoopy/fonts/ui-large.cpfont",
+      "display": "themes/snoopy/fonts/display.cpfont"
+    }
+  }
+}
