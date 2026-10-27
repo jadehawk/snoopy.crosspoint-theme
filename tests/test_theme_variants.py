@@ -3,9 +3,10 @@ import json
 import struct
 import tempfile
 import unittest
+from unittest.mock import patch
 import zipfile
 import io
-from PIL import Image
+from PIL import Image, ImageOps
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -17,7 +18,17 @@ class VariantPackageTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.temp=tempfile.TemporaryDirectory()
-        cls.zips=MODULE.build(ROOT,Path(cls.temp.name),"0.1.16")
+        # The Star Wars conversion uses ImageOps.fit to crop edge-to-edge.
+        # Any return to ImageOps.pad would produce white sleep-screen borders.
+        prepare_sleep = MODULE.prepare_sleep_grayscale
+        def checked_sleep(root):
+            with patch.object(ImageOps, "pad", side_effect=AssertionError("sleep screens must not be letterboxed")), \
+                 patch.object(ImageOps, "fit", wraps=ImageOps.fit) as cover:
+                images = prepare_sleep(root)
+                assert cover.call_count == 20, "all 10 sleep scenes need an X3 and X4+ full-bleed crop"
+                return images
+        with patch.object(MODULE, "prepare_sleep_grayscale", side_effect=checked_sleep):
+            cls.zips=MODULE.build(ROOT,Path(cls.temp.name),"0.1.17")
 
     @classmethod
     def tearDownClass(cls):

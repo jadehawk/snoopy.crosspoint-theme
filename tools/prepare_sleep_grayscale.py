@@ -1,6 +1,6 @@
 """Prepare crisp, bright native four-tone Snoopy sleep BMPs for each display."""
 from pathlib import Path
-from PIL import Image, ImageEnhance, ImageOps
+from PIL import Image, ImageOps
 
 PROFILES = {"x3": (528, 792), "x4plus": (480, 800)}
 SOURCE = Path(__file__).resolve().parents[1] / "source-art" / "sleep-grayscale"
@@ -22,8 +22,10 @@ def create(root: Path):
         for index, src in enumerate(images, 1):
             with Image.open(src) as image:
                 image = ImageOps.exif_transpose(image).convert("RGB")
-                # No cropping of characters or art; preserve white sidebands.
-                image = ImageOps.pad(image, dimensions, method=Image.Resampling.LANCZOS, color="white")
+                # Match the Star Wars wallpaper contract: fill the screen with
+                # a centered crop, never introduce white padding bands.
+                image = ImageOps.fit(image, dimensions, method=Image.Resampling.LANCZOS,
+                                     centering=(0.5, 0.5))
                 gray = ImageOps.grayscale(image)
                 # Gently brighten darker phone wallpapers; keep light backgrounds clean.
                 gray = gray.point(lambda v: min(255, round(255 * (v / 255) ** 0.82)))
