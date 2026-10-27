@@ -5,8 +5,8 @@ import tempfile
 import unittest
 from unittest.mock import patch
 import zipfile
-import io
-from PIL import Image, ImageOps
+from PIL import ImageOps
+from tools.prepare_sleep_grayscale import decode_native_2bpp_bmp
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -28,7 +28,7 @@ class VariantPackageTests(unittest.TestCase):
                 assert cover.call_count == 20, "all 10 sleep scenes need an X3 and X4+ full-bleed crop"
                 return images
         with patch.object(MODULE, "prepare_sleep_grayscale", side_effect=checked_sleep):
-            cls.zips=MODULE.build(ROOT,Path(cls.temp.name),"0.1.18")
+            cls.zips=MODULE.build(ROOT,Path(cls.temp.name),"0.1.19")
 
     @classmethod
     def tearDownClass(cls):
@@ -69,9 +69,22 @@ class VariantPackageTests(unittest.TestCase):
                 gray_path=scene['assets']['usb_gray_art']
                 self.assertIn(gray_path, manifest['files'])
                 self.assertEqual(gray_path.endswith('-touch.bmp'), variant=='x4plus')
-                with Image.open(io.BytesIO(z.read(prefix+gray_path))) as bmp:
-                    self.assertEqual(bmp.size, size)
-                    self.assertGreaterEqual(len(set(bmp.convert('L').get_flattened_data())), 3)
+                usb_bytes = z.read(prefix + gray_path)
+                bmp = decode_native_2bpp_bmp(usb_bytes)
+                self.assertEqual(bmp.size, size)
+                self.assertEqual(set(bmp.get_flattened_data()), {0, 85, 170, 255})
+                self.assertEqual(int.from_bytes(usb_bytes[28:30], "little"), 2)
+                # X3 must avoid 32-KiB inflate windows, USB included.
+                if variant == "x3":
+                    self.assertEqual(z.getinfo(prefix + gray_path).compress_type, zipfile.ZIP_STORED)
+
+    def test_usb_converter_crops_not_pads(self):
+        from tools import prepare_usb_grayscale
+        with patch.object(ImageOps, "pad", side_effect=AssertionError("USB must not be letterboxed")), \
+             patch.object(ImageOps, "fit", wraps=ImageOps.fit) as cover:
+            paths = prepare_usb_grayscale.create(ROOT)
+            self.assertEqual(cover.call_count, 2)
+        self.assertEqual(set(paths), {"x3", "x4plus"})
 
     def test_no_duplicate_artwork(self):
         sources=[]
