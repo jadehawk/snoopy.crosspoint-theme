@@ -28,7 +28,7 @@ class VariantPackageTests(unittest.TestCase):
                 assert cover.call_count == 20, "all 10 sleep scenes need an X3 and X4+ full-bleed crop"
                 return images
         with patch.object(MODULE, "prepare_sleep_grayscale", side_effect=checked_sleep):
-            cls.zips=MODULE.build(ROOT,Path(cls.temp.name),"0.1.19")
+            cls.zips=MODULE.build(ROOT,Path(cls.temp.name),"0.1.20")
 
     @classmethod
     def tearDownClass(cls):

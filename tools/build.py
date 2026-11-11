@@ -240,7 +240,7 @@ scene={
      'homeRecentBooksCount':1,'homeContinueReadingInMenu':False,'homeMenuTopOffset':12,
      'contentSidePadding':14,'previewPadding':10,'verticalSpacing':8,
      'headerSidePadding':14,'headerUnderlineSize':1,'headerTitleAlign':0,
-     'headerBatterySide':0,'headerShowsClock':False,'headerClockCentered':False,
+     'headerBatterySide':0,
      'menuRowHeight':54,'menuSpacing':3,'listRowHeight':62,
      'listWithSubtitleRowHeight':72,'listRowGap':8,'listRowRadius':16,
      'listInset':14,'listSidePadding':17,'listSeparators':False,'listTitleBold':True,
@@ -269,7 +269,7 @@ scene={
    'header':[
       {'op':'fill','color':'white'},
       {'op':'bitmap','asset':'header_emblem','anchor':'left','offset':[8,0],
-       'paint':'ink-only','fit':'native','max_width':76,'max_height':58},
+       'paint':'ink-only','fit':'contain','max_width':76,'max_height':42},
       {'op':'text','source':'screen_title','font':'ui_bold','color':'black',
        'anchor':'left','offset':[100,0],'max_width':265},
       {'op':'line','anchor':'bottom','color':'black','thickness':2}
@@ -322,7 +322,7 @@ DynaPuff typeface is by The DynaPuff Project Authors and distributed under
 SIL Open Font License 1.1; see DETAILS.md for the complete OFL text.
 '''
 (PKG/'README.md').write_text(readme)
-(PKG/'DETAILS.md').write_text('''# Snoopy - Cozy Reading (v0.1.19)
+(PKG/'DETAILS.md').write_text('''# Snoopy - Cozy Reading (v0.1.20)
 
 Unofficial concept based on the user-provided Snoopy e-reader mockup.
 
@@ -345,7 +345,7 @@ details_path.write_text(details_path.read_text(encoding='utf-8') +
 
 manifest={
  'kind':'theme-pack','name':'snoopy','title':'Snoopy','description':'Cozy Snoopy theme with grayscale USB and sleep illustrations for e-ink screens.',
- 'author':'Jadehawk (concept adaptation)','version':'0.1.19',
+ 'author':'Jadehawk (concept adaptation)','version':'0.1.20',
  'license':'Unofficial non-commercial fan theme; Peanuts character rights belong to their respective owners.',
  'themes':[{'id':'snoopy','title':'Snoopy','path':'themes/snoopy/theme.json',
             'requires':['theme.sd.v1','theme.metrics.v1','theme.images.v1','theme.composition.v1','theme.settings-navigation.v1','theme.book-cover.v1','theme.menu-decoration.v1','theme.screen-decoration.v1','theme.header-back.v1','theme.fonts.v1','theme.font-family.v1','theme.sleep-gallery.v1','theme.sleep-grayscale.v1','theme.usb-scene.v1','theme.usb-grayscale.v1']}],
@@ -359,7 +359,7 @@ An **unofficial, non-commercial fan-made theme** with AI-generated Snoopy and Wo
 
 ## Install
 
-Download the device-matched `snoopy-x3-0.1.19.crosspoint-theme.zip` or `snoopy-x4plus-0.1.19.crosspoint-theme.zip` via The Cantina Store, or extract either ZIP to SD path:
+Download the device-matched `snoopy-x3-0.1.20.crosspoint-theme.zip` or `snoopy-x4plus-0.1.20.crosspoint-theme.zip` via The Cantina Store, or extract either ZIP to SD path:
 
 ```
 /.crosspoint/themes/snoopy.crosspoint-theme/
@@ -371,7 +371,7 @@ Select a firmware Dark/Light sleep screen to test the theme's sleep image; Custo
 ## X3-specific corrections to the concept
 
 1. The X3 is 528 x 792 and has no touch interface. This version uses one native Continue Reading card and a navigable list, not the concept's four-cover touchscreen grid.
-2. A 76px Home/Settings header leaves space for firmware-owned battery, title and Back actions; the Snoopy heart is now inset fully within the emblem.
+2. The 76px Home/Settings header shares Lyra's top-left clock and top-right battery clearance; Snoopy's scaled 42px emblem, title and touch Back arrow remain within the original band.
 3. The Home tile expands into previously unused X3 space to restore a real cached cover, book title, author, and actual progress bar when available; firmware keeps book selection and menu behavior.
 4. UI decorations remain CPB v1 monochrome; USB and ten sleep illustrations use native full-bleed four-tone grayscale 2-bit BMPs.
 5. Sleep and USB artwork are exported independently at 528 x 792 (X3) and 480 x 800 (X4+).
@@ -382,7 +382,7 @@ Select a firmware Dark/Light sleep screen to test the theme's sleep image; Custo
 - Theme schemas cannot replace the firmware's core Home layout, add new menu actions, draw live book grids, or add touch control on X3.
 - Full-screen theme sleep galleries are used for Dark/Light regular sleep entries, not the independent timed sleep refresh pool.
 - This unofficial, non-commercial theme uses Snoopy and Woodstock characters; all Peanuts character trademarks and copyrights remain with their respective rights holders. It is not endorsed by them.
-- Version 0.1.19 preserves all ten full-bleed four-tone scenes, now encoded as compact 2-bit BMPs. X3 uses ZIP_STORED to avoid the 32 KiB decompression window on devices without PSRAM; X4+ retains compressed ZIP entries. The USB illustration now uses the same full-bleed fit and native 2-bit BMP conversion, with full-bleed one-bit fallback. X3 update needs hardware verification.
+- Version 0.1.20 preserves all ten full-bleed four-tone scenes, now encoded as compact 2-bit BMPs. X3 uses ZIP_STORED to avoid the 32 KiB decompression window on devices without PSRAM; X4+ retains compressed ZIP entries. The USB illustration now uses the same full-bleed fit and native 2-bit BMP conversion, with full-bleed one-bit fallback. X3 update needs hardware verification.
 
 ## Files
 
@@ -391,7 +391,7 @@ Select a firmware Dark/Light sleep screen to test the theme's sleep image; Custo
 - `source-fonts/` contains the upstream DynaPuff TTF and SIL OFL license. Run `python tools/build_fonts.py` before `python tools/build.py` when updating font assets.
 - `previews/` has illustrative X3-size previews, not exact firmware screenshots.
 
-Compatibility is capability-based. Snoopy v0.1.19 requires `theme.sleep-grayscale.v1` and `theme.usb-grayscale.v1` as well as the declared standard theme capabilities; only firmware exposing all required capabilities should install the theme. No branded firmware name is a requirement.
+Compatibility is capability-based. Snoopy v0.1.20 requires `theme.sleep-grayscale.v1` and `theme.usb-grayscale.v1` as well as the declared standard theme capabilities; only firmware exposing all required capabilities should install the theme. No branded firmware name is a requirement.
 ''')
 # Approximate X3 previews only. Keep firmware-owned book/menu labels, touch
 # targets, real battery, and row selection distinct from static theme artwork.
@@ -456,7 +456,7 @@ assert sum((PKG/f).stat().st_size for f in manifest['files'])<4*1024*1024
 assert (PKG/'README.md').stat().st_size<2048
 assert all((PKG/f).is_file() for f in manifest['files'])
 for generated in (PKG/'README.md', PKG/'DETAILS.md', OUT/'README.md'):
-    generated.write_text(generated.read_text(encoding='utf-8').replace('0.1.11','0.1.19'),encoding='utf-8')
+    generated.write_text(generated.read_text(encoding='utf-8').replace('0.1.11','0.1.20'),encoding='utf-8')
 # Source payload stays combined for authoring and regression tests; the
 # installable packages each contain only one resolution's CPBs.
 from pack_theme_variants import build as pack_resolution_variants

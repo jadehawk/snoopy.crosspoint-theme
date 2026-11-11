@@ -11,7 +11,7 @@ import zlib
 ROOT=Path(__file__).resolve().parents[1]
 PACK=ROOT/'snoopy.crosspoint-theme'
 GALLERY=ROOT/'source-art/Snoopy_Woodstock_22_Sleep_Scenes_X3_X4Pro.zip'
-VERSION='0.1.19'
+VERSION='0.1.20'
 ZIPDIR=ROOT/'dist'
 
 class ThemeChecks(unittest.TestCase):
@@ -48,7 +48,8 @@ class ThemeChecks(unittest.TestCase):
         self.assertEqual(m['regions']['home'][-1]['variant'],'cover')
         header_emblem = next(op for op in m['regions']['header'] if op['op']=='bitmap')
         self.assertGreaterEqual(header_emblem['max_width'], 76)
-        self.assertGreaterEqual(header_emblem['max_height'], 58)
+        self.assertEqual(header_emblem['max_height'], 42)
+        self.assertEqual(header_emblem['fit'], 'contain')
         self.assertIn('theme.book-cover.v1',
                       json.loads((PACK/'manifest.json').read_text())['themes'][0]['requires'])
         self.assertEqual(m['metrics']['homeCoverTileHeight'],320)

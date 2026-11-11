@@ -23,8 +23,6 @@
     "headerUnderlineSize": 1,
     "headerTitleAlign": 0,
     "headerBatterySide": 0,
-    "headerShowsClock": false,
-    "headerClockCentered": false,
     "menuRowHeight": 54,
     "menuSpacing": 3,
     "listRowHeight": 62,
@@ -87,9 +85,9 @@
           0
         ],
         "paint": "ink-only",
-        "fit": "native",
+        "fit": "contain",
         "max_width": 76,
-        "max_height": 58
+        "max_height": 42
       },
       {
         "op": "text",
