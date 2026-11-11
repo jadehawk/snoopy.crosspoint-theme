@@ -1,0 +1,48 @@
+name: Validate Snoopy SD theme package
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test dependencies
+        run: python -m pip install --disable-pip-version-check Pillow
+      - name: Validate version for release tags
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          version = json.load(open("snoopy.crosspoint-theme/manifest.json", encoding="utf-8"))["version"]
+          assert os.environ["GITHUB_REF_NAME"] == "v" + version
+          PY
+      - name: Generate both install-only packages from committed assets
+        run: python tools/pack_theme_variants.py
+      - name: Run all theme and packaging regression tests
+        run: python -m unittest discover -s tests -p 'test_*.py' -q
+      - name: Assert validation never rewrites source files
+        run: git diff --exit-code
+      - name: Retain checked theme variants for release tags
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-artifact@v4
+        with:
+          name: verified-snoopy-theme-${{ github.ref_name }}
+          path: |
+            dist/snoopy-x3-*.crosspoint-theme.zip
+            dist/snoopy-x4plus-*.crosspoint-theme.zip
+          if-no-files-found: error

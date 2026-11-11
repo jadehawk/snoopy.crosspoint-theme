@@ -1,3 +1,4 @@
+import hashlib
 import importlib.util
 import json
 import struct
@@ -5,7 +6,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 import zipfile
-from PIL import ImageOps
+from PIL import Image, ImageOps
 from tools.prepare_sleep_grayscale import decode_native_2bpp_bmp
 from pathlib import Path
 
@@ -18,17 +19,16 @@ class VariantPackageTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.temp=tempfile.TemporaryDirectory()
-        # The Star Wars conversion uses ImageOps.fit to crop edge-to-edge.
-        # Any return to ImageOps.pad would produce white sleep-screen borders.
-        prepare_sleep = MODULE.prepare_sleep_grayscale
-        def checked_sleep(root):
-            with patch.object(ImageOps, "pad", side_effect=AssertionError("sleep screens must not be letterboxed")), \
-                 patch.object(ImageOps, "fit", wraps=ImageOps.fit) as cover:
-                images = prepare_sleep(root)
-                assert cover.call_count == 20, "all 10 sleep scenes need an X3 and X4+ full-bleed crop"
-                return images
-        with patch.object(MODULE, "prepare_sleep_grayscale", side_effect=checked_sleep):
-            cls.zips=MODULE.build(ROOT,Path(cls.temp.name),"0.1.20")
+        # Release packaging must not generate or alter checked-in artwork,
+        # theme metadata, README files, or approved sleep BMPs.
+        sources = [ROOT / "README.md", *(
+            path for directory in ("snoopy.crosspoint-theme", "source-art/release-sleep")
+            for path in (ROOT / directory).rglob("*") if path.is_file()
+        )]
+        before = {path: hashlib.sha256(path.read_bytes()).digest() for path in sources}
+        cls.zips = MODULE.build(ROOT, Path(cls.temp.name))
+        after = {path: hashlib.sha256(path.read_bytes()).digest() for path in sources}
+        assert before == after, "Release packaging changed committed source files"
 
     @classmethod
     def tearDownClass(cls):
@@ -42,12 +42,26 @@ class VariantPackageTests(unittest.TestCase):
                 manifest=json.loads(z.read(prefix+"manifest.json"))
                 scene=json.loads(z.read(prefix+"themes/snoopy/theme.json"))
                 self.assertEqual(manifest["name"],"snoopy")
+                self.assertEqual(scene["reference"], {"width":528,"height":792,"adapt":"scale-to-fit"})
                 self.assertEqual(manifest["target_resolution"],dict(zip(("width","height"),size)))
                 self.assertEqual(names,{prefix+n for n in manifest["files"]} |
                                  {n for n in names if "/sleep/" in n})
+                # All non-metadata payload bytes must be the checked-in files,
+                # never output silently recreated by an artwork generator.
+                package = ROOT / "snoopy.crosspoint-theme"
+                for name in manifest["files"]:
+                    if name not in {"manifest.json", "themes/snoopy/theme.json"}:
+                        self.assertEqual(z.read(prefix + name), (package / name).read_bytes())
                 self.assertLessEqual(len(names),64)
                 self.assertEqual(scene["assets"]["sleep_art"],"themes/snoopy/sleep")
                 self.assertEqual(len([p for p in names if "/sleep/" in p]),10)
+                for index in range(1, 11):
+                    filename = f"sleep-scene-{index:02d}.bmp"
+                    approved = ROOT / "source-art" / "release-sleep" / variant / filename
+                    self.assertEqual(
+                        z.read(prefix + "themes/snoopy/sleep/" + filename),
+                        approved.read_bytes(),
+                    )
                 for role in ("header_emblem","home_hero","home_footer","screen_art","boot_art","sleep_art","usb_art","usb_gray_art"):
                     self.assertIn(role,scene["assets"])
                 bitmap_paths=[n for n in manifest["files"] if n.endswith(".cpb")]
@@ -80,11 +94,30 @@ class VariantPackageTests(unittest.TestCase):
 
     def test_usb_converter_crops_not_pads(self):
         from tools import prepare_usb_grayscale
-        with patch.object(ImageOps, "pad", side_effect=AssertionError("USB must not be letterboxed")), \
+        with Image.open(prepare_usb_grayscale.SOURCE) as original, \
+             patch.object(ImageOps, "pad", side_effect=AssertionError("USB must not be letterboxed")), \
              patch.object(ImageOps, "fit", wraps=ImageOps.fit) as cover:
-            paths = prepare_usb_grayscale.create(ROOT)
+            for size in MODULE.PROFILES.values():
+                image = prepare_usb_grayscale.four_tone(original, size)
+                self.assertEqual(image.size, size)
             self.assertEqual(cover.call_count, 2)
-        self.assertEqual(set(paths), {"x3", "x4plus"})
+
+    def test_source_version_is_authoritative(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaisesRegex(ValueError, "differs from manifest"):
+                MODULE.build(ROOT, Path(directory), "0.0.0")
+
+    def test_workflows_match_halo_release_contract(self):
+        release = (ROOT / ".github/workflows/release.yml").read_text(encoding="utf-8")
+        validate = (ROOT / ".github/workflows/validate-theme.yml").read_text(encoding="utf-8")
+        self.assertIn('tags:\n      - "v*"', release)
+        self.assertIn('gh release create', release)
+        self.assertIn('git diff --exit-code', release)
+        self.assertIn('python tools/pack_theme_variants.py', release)
+        self.assertNotIn('tools/build.py', release)
+        self.assertIn("pull_request:", validate)
+        self.assertIn("git diff --exit-code", validate)
+        self.assertFalse((ROOT / ".github/workflows/prepare-theme-variants.yml").exists())
 
     def test_no_duplicate_artwork(self):
         sources=[]

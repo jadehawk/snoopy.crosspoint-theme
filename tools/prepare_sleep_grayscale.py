@@ -1,4 +1,8 @@
-"""Prepare crisp, bright native four-tone Snoopy sleep BMPs for each display."""
+"""Authoring-only conversion of Snoopy sleep source images to four-tone BMPs.
+
+Review output under dist/sleep-grayscale and explicitly copy approved assets into
+source-art/release-sleep. Release packaging never runs this conversion.
+"""
 from pathlib import Path
 import struct
 from PIL import Image, ImageOps

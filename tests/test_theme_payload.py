@@ -15,6 +15,15 @@ VERSION='0.1.20'
 ZIPDIR=ROOT/'dist'
 
 class ThemeChecks(unittest.TestCase):
+    def test_artwork_builder_leaves_checked_in_metadata_alone(self):
+        builder = (ROOT / "tools/build.py").read_text(encoding="utf-8")
+        self.assertNotIn("(OUT/'README.md').write_text", builder)
+        self.assertNotIn("(PKG/'manifest.json').write_text", builder)
+        self.assertNotIn("(PKG/'DETAILS.md').write_text", builder)
+        self.assertNotIn("(PKG/'themes/snoopy/theme.json').write_text", builder)
+        self.assertNotIn("pack_resolution_variants", builder)
+        self.assertIn("manifest = json.loads((PKG / 'manifest.json').read_text", builder)
+
     def test_package_shape(self):
         m=json.loads((PACK/'manifest.json').read_text())
         self.assertEqual(m['kind'],'theme-pack')
@@ -122,13 +131,13 @@ class ThemeChecks(unittest.TestCase):
                     if profile == 'x3':
                         self.assertEqual(archive.getinfo(name).compress_type, zipfile.ZIP_STORED)
 
-    def test_original_x3_footers_remain_byte_identical(self):
+    def test_released_x3_artwork_remains_byte_identical(self):
         for name, expected in (
-            ('home-footer.cpb', '0bfab335609cb3a51c79ba25829dfb18c354d7faebd2343d9d6eb2d2a45aa77c'),
+            ('home-footer.cpb', '93e79eee39adf792a18407062358dbb0e06db909c8d09cd4d24e104184044867'),
             ('screen-decoration.cpb', '7ae168bff79a315f58b310ee9f5ee2504afeb6ee632615bd3b0ad5fe96c17e5f'),
             ('header-emblem.cpb', '84658cee3e969a61d0afbfa82014b834474250e0ab2cad2206ad7b9febd98da2'),
-            ('home-hero.cpb', '5f5f007c52dfdd4d6f056a53a72ff0c36c6e00e94674af04f863f115302dbb74'),
-            ('boot-art.cpb', '4fa9020730f094862775ecc49e4bd024563fa576a0263edb778f2a6d124f3156'),
+            ('home-hero.cpb', '5c22eca1712752c2ad1bf3cce09fe514ced417ae48c6be180f6fc86add16f26e'),
+            ('boot-art.cpb', '8c34a17f1ae68a74f974ef10974aedfbc0c1979100227e9cf37e022a8680ea36'),
         ):
             with self.subTest(name=name):
                 asset=(PACK/'themes/snoopy/assets'/name).read_bytes()

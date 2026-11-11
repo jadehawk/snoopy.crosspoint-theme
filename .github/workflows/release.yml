@@ -1,0 +1,43 @@
+name: Release Snoopy device-specific themes
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install image conversion dependency
+        run: python -m pip install --disable-pip-version-check Pillow
+      - name: Require release tag to match committed manifest
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          version = json.load(open("snoopy.crosspoint-theme/manifest.json", encoding="utf-8"))["version"]
+          assert os.environ["GITHUB_REF_NAME"] == "v" + version, "Release tag must match manifest version"
+          PY
+      - name: Package committed X3 and X4Plus theme sources
+        run: python tools/pack_theme_variants.py
+      - name: Run full theme and variant regression suite
+        run: python -m unittest discover -s tests -p 'test_*.py' -q
+      - name: Assert packaging never rewrites source files
+        run: git diff --exit-code
+      - name: Publish both assets under one versioned release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          gh release create "$GITHUB_REF_NAME" \
+            "dist/snoopy-x3-${VERSION}.crosspoint-theme.zip" \
+            "dist/snoopy-x4plus-${VERSION}.crosspoint-theme.zip" \
+            --title "Snoopy v${VERSION}" --notes-file CHANGELOG.md --verify-tag
