@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.21 — Home Book Carousel support
+
+- Explicitly enable the firmware-owned Book Carousel for the existing native cover card.
+- Retain the approved visuals and artwork; compatible firmware handles bounded Home navigation.
+
 ## Unreleased — Publishing consistency with Halo
 
 - Publish on a matching `vMAJOR.MINOR.PATCH` Git tag, with a single release holding X3 and X4Plus ZIPs.

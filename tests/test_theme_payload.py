@@ -11,7 +11,7 @@ import zlib
 ROOT=Path(__file__).resolve().parents[1]
 PACK=ROOT/'snoopy.crosspoint-theme'
 GALLERY=ROOT/'source-art/Snoopy_Woodstock_22_Sleep_Scenes_X3_X4Pro.zip'
-VERSION='0.1.20'
+VERSION='0.1.21'
 ZIPDIR=ROOT/'dist'
 
 class ThemeChecks(unittest.TestCase):
@@ -41,6 +41,7 @@ class ThemeChecks(unittest.TestCase):
         m=json.loads((PACK/'themes/snoopy/theme.json').read_text())
         self.assertEqual(m['reference'],{'width':528,'height':792,'adapt':'scale-to-fit'})
         self.assertEqual(m['styles']['settings_navigation'],'list')
+        self.assertTrue(m['styles']['book_carousel'])
         self.assertEqual(m['styles']['header_back_style'],'both')
         self.assertIn('theme.header-back.v1', json.loads((PACK/'manifest.json').read_text())['themes'][0]['requires'])
         for role in ('header_emblem','home_hero','home_footer','screen_art','boot_art'):

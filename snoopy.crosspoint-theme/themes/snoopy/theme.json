@@ -52,6 +52,7 @@
     "menu_footer_asset": "home_footer",
     "menu_footer_touch_asset": "home_footer_touch",
     "settings_navigation": "list",
+    "book_carousel": true,
     "header_back_style": "both"
   },
   "assets": {
